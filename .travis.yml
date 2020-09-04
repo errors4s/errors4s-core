@@ -1,0 +1,18 @@
+os:
+  - linux
+  - osx
+language: scala
+jdk:
+  - oraclejdk11
+  - openjdk8
+  - openjdk11
+  - openjdk14
+script:
+  - sbt +clean
+  - sbt 'scalafixAll --check'
+  - sbt +docs/mdoc
+  - sbt scalafmtCheckAll scalafmtSbtCheck +clean +test +doc +test:doc
+jobs:
+  exclude:
+    - os: osx
+      jdk: openjdk8
