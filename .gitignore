@@ -1,0 +1,8 @@
+target/
+*~
+
+# doc site stuff
+/website/*
+
+!/website/siteConfig.js
+!/website/core/Footer.js
