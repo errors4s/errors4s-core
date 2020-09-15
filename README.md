@@ -13,7 +13,7 @@ This project has the following goals,
 * [http4s-circe][http4s-circe]
 
 [core-scaladoc]: https://oss.sonatype.org/service/local/repositories/snapshots/archive/io/isomarcte/errors4s-core_2.13/0.0.1-SNAPSHOT/errors4s-core_2.13-0.0.1-SNAPSHOT-javadoc.jar/!/io/isomarcte/errors4s/core/index.html "Core Scaladoc"
-[http-scaladoc]: https://oss.sonatype.org/service/local/repositories/snapshots/archive/io/isomarcte/errors4s-http-circe_2.13/0.0.1-SNAPSHOT/errors4s-http-circe_2.13-0.0.1-SNAPSHOT-javadoc.jar/!/io/isomarcte/errors4s/http/circe/index.html "Http Scaladoc"
+[http-scaladoc]: https://oss.sonatype.org/service/local/repositories/snapshots/archive/io/isomarcte/errors4s-http_2.13/0.0.1-SNAPSHOT/errors4s-http_2.13-0.0.1-SNAPSHOT-javadoc.jar/!/io/isomarcte/errors4s/http/index.html "Http Scaladoc"
 [http-circe]: https://oss.sonatype.org/service/local/repositories/snapshots/archive/io/isomarcte/errors4s-http-circe_2.13/0.0.1-SNAPSHOT/errors4s-http-circe_2.13-0.0.1-SNAPSHOT-javadoc.jar/!/io/isomarcte/errors4s/http/circe/index.html "Http Circe Scaladoc"
 [http4s-circe]: https://oss.sonatype.org/service/local/repositories/snapshots/archive/io/isomarcte/errors4s-http4s-circe_2.13/0.0.1-SNAPSHOT/errors4s-http4s-circe_2.13-0.0.1-SNAPSHOT-javadoc.jar/!/io/isomarcte/errors4s/http4s/circe/index.html "Http4s Circe Scaladoc"
 
