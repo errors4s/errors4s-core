@@ -5,6 +5,18 @@ This project has the following goals,
 * Provide a better base type for errors than `Throwable`.
 * Provide an implementation of [RFC 7807][rfc-7807]
 
+# ScalaDoc #
+
+* [core][core-scaladoc]
+* [http][http-scaladoc]
+* [http-circe][http-circe]
+* [http4s-circe][http4s-circe]
+
+[core-scaladoc]: https://oss.sonatype.org/service/local/repositories/snapshots/archive/io/isomarcte/errors4s-core_2.13/0.0.1-SNAPSHOT/errors4s-core_2.13-0.0.1-SNAPSHOT-javadoc.jar/!/io/isomarcte/errors4s/core/index.html "Core Scaladoc"
+[http-scaladoc]: https://oss.sonatype.org/service/local/repositories/snapshots/archive/io/isomarcte/errors4s-http-circe_2.13/0.0.1-SNAPSHOT/errors4s-http-circe_2.13-0.0.1-SNAPSHOT-javadoc.jar/!/io/isomarcte/errors4s/http/circe/index.html "Http Scaladoc"
+[http-circe]: https://oss.sonatype.org/service/local/repositories/snapshots/archive/io/isomarcte/errors4s-http-circe_2.13/0.0.1-SNAPSHOT/errors4s-http-circe_2.13-0.0.1-SNAPSHOT-javadoc.jar/!/io/isomarcte/errors4s/http/circe/index.html "Http Circe Scaladoc"
+[http4s-circe]: https://oss.sonatype.org/service/local/repositories/snapshots/archive/io/isomarcte/errors4s-http4s-circe_2.13/0.0.1-SNAPSHOT/errors4s-http4s-circe_2.13-0.0.1-SNAPSHOT-javadoc.jar/!/io/isomarcte/errors4s/http4s/circe/index.html "Http4s Circe Scaladoc"
+
 # Overview #
 
 This project provides a better root error type `Error` which extends `Throwable` but provides better minimum constraints on what must be declared with the error. The `core` module has one  dependencies, [refined][refined]. [refined][refined] is used to enforce the fundamental concept of `errors4s`, when throwing an error you must provide enough information to make that error _useful_.
