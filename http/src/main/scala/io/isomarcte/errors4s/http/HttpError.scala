@@ -55,3 +55,15 @@ trait HttpError extends Error {
 
   final override lazy val primaryErrorMessage: NonEmptyString = detail.getOrElse(title)
 }
+
+object HttpError {
+
+  /** The trivial implementation of [[HttpError]]. */
+  final case class SimpleHttpError(
+    override val `type`: NonEmptyString,
+    override val title: NonEmptyString,
+    override val status: HttpStatus,
+    override val detail: Option[NonEmptyString],
+    override val instance: Option[NonEmptyString]
+  ) extends HttpError
+}

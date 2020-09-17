@@ -3,14 +3,14 @@ package io.isomarcte.errors4s.http4s.circe.middleware
 import cats.data._
 import cats.effect._
 import cats.implicits._
-import io.isomarcte.errors4s.http.circe._
+import io.isomarcte.errors4s.http._
 import io.isomarcte.errors4s.http4s.circe._
 import org.http4s._
 import org.http4s.server._
 
 object CirceHttpErrorToResponse {
 
-  /** A middleware which catches `CirceHttpError` or `CirceHttpProblem` converts them in
+  /** A middleware which catches `HttpError` or `HttpProblem` converts them in
     * to the appropriate `Response` values. Other `Throwable` values are
     * ignored, e.g. they are not caught.
     *
@@ -26,13 +26,13 @@ object CirceHttpErrorToResponse {
           .run(request)
           .value
           .recoverWith {
-            case e: CirceHttpError =>
-              F.pure(Some(Response(status = Status(e.status.value)).withEntity(e)(circeHttpErrorJsonEntityEncoder[F])))
-            case e: CirceHttpProblem =>
+            case e: HttpError =>
+              F.pure(Some(Response(status = Status(e.status.value)).withEntity(e)(httpErrorJsonEntityEncoder[F])))
+            case e: HttpProblem =>
               F.pure(
                 Some(
                   Response(status = e.status.fold(Status.InternalServerError)(value => Status(value)))
-                    .withEntity(e)(circeHttpProblemJsonEntityEncoder[F])
+                    .withEntity(e)(httpProblemJsonEntityEncoder[F])
                 )
               )
           }

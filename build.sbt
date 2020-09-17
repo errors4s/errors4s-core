@@ -10,20 +10,25 @@ lazy val projectUrl    = url("https://github.com/isomarcte/errors4s")
 
 // Groups //
 
+lazy val chrisDavenportG  = "io.chrisdavenport"
 lazy val circeG           = "io.circe"
 lazy val comcastG         = "com.comcast"
+lazy val fs2G             = "co.fs2"
 lazy val http4sG          = "org.http4s"
 lazy val organizeImportsG = "com.github.liancheng"
 lazy val refinedG         = "eu.timepit"
 lazy val scalatestG       = "org.scalatest"
+lazy val shapelessG       = "com.chuusai"
 lazy val typelevelG       = "org.typelevel"
 
 // Artifacts //
 
 lazy val catsCoreA        = "cats-core"
+lazy val catsEffectA      = "cats-effect"
 lazy val circeCoreA       = "circe-core"
 lazy val circeGenericA    = "circe-generic"
 lazy val circeRefinedA    = "circe-refined"
+lazy val fs2CoreA         = "fs2-core"
 lazy val http4sCirceA     = "http4s-circe"
 lazy val http4sCoreA      = "http4s-core"
 lazy val http4sServerA    = "http4s-server"
@@ -32,16 +37,22 @@ lazy val organizeImportsA = "organize-imports"
 lazy val refinedA         = "refined"
 lazy val refinedCatsA     = "refined-cats"
 lazy val scalatestA       = "scalatest"
+lazy val shapelessA       = "shapeless"
+lazy val vaultA           = "vault"
 
 // Versions //
 
+lazy val catsEffectV      = "2.1.4"
 lazy val catsV            = "2.2.0"
 lazy val circeV           = "0.13.0"
+lazy val fs2V             = "2.4.2"
 lazy val http4sV          = "0.21.7"
 lazy val ip4sV            = "1.4.0"
 lazy val organizeImportsV = "0.4.0"
 lazy val refinedV         = "0.9.15"
 lazy val scalatestV       = "3.2.2"
+lazy val shapelessV       = "2.3.3"
+lazy val vaultV           = "2.0.0"
 
 // Common Settings
 
@@ -127,7 +138,10 @@ lazy val core = project
 
 lazy val http = project
   .settings(commonSettings, publishSettings)
-  .settings(name := s"${projectName}-http")
+  .settings(
+    name := s"${projectName}-http",
+    libraryDependencies ++= List(refinedG %% refinedA % refinedV, shapelessG %% shapelessA % shapelessV)
+  )
   .dependsOn(core)
 
 // circe //
@@ -137,7 +151,14 @@ lazy val `http-circe` = project
   .settings(
     name := s"${projectName}-http-circe",
     libraryDependencies ++=
-      List(circeG %% circeCoreA % circeV, circeG %% circeGenericA % circeV, circeG %% circeRefinedA % circeV)
+      List(
+        circeG     %% circeCoreA    % circeV,
+        circeG     %% circeGenericA % circeV,
+        circeG     %% circeRefinedA % circeV,
+        refinedG   %% refinedA      % refinedV,
+        shapelessG %% shapelessA    % shapelessV,
+        typelevelG %% catsCoreA     % catsV
+      )
   )
   .dependsOn(http)
 
@@ -149,10 +170,18 @@ lazy val `http4s-circe` = project
     name := s"${projectName}-http4s-circe",
     libraryDependencies ++=
       List(
-        http4sG    %% http4sCirceA  % http4sV,
-        http4sG    %% http4sCoreA   % http4sV,
-        http4sG    %% http4sServerA % http4sV,
-        scalatestG %% scalatestA    % scalatestV % Test
+        chrisDavenportG %% vaultA        % vaultV,
+        circeG          %% circeCoreA    % circeV,
+        fs2G            %% fs2CoreA      % fs2V,
+        http4sG         %% http4sCirceA  % http4sV,
+        http4sG         %% http4sCoreA   % http4sV,
+        http4sG         %% http4sServerA % http4sV,
+        refinedG        %% refinedA      % refinedV,
+        shapelessG      %% shapelessA    % shapelessV,
+        typelevelG      %% catsCoreA     % catsV,
+        typelevelG      %% catsCoreA     % catsV,
+        typelevelG      %% catsEffectA   % catsEffectV,
+        scalatestG      %% scalatestA    % scalatestV % Test
       )
   )
   .dependsOn(`http-circe`)
