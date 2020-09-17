@@ -4,9 +4,9 @@ import cats.data._
 import cats.effect._
 import cats.implicits._
 import eu.timepit.refined.types.all._
+import io.isomarcte.errors4s.http.HttpError._
+import io.isomarcte.errors4s.http.HttpProblem._
 import io.isomarcte.errors4s.http._
-import io.isomarcte.errors4s.http.circe.CirceHttpError._
-import io.isomarcte.errors4s.http.circe.CirceHttpProblem._
 import io.isomarcte.errors4s.http4s.circe._
 import org.http4s._
 import org.http4s.headers._
@@ -21,8 +21,7 @@ final class CirceHttpErrorToResponseTest extends BaseTest {
   "CirceHttpErrorToResponse.json middleware" should
     "yield a application/json+problem with a 501 status when a specific CirceHttpError is raised" in
     sio {
-      implicit val ed: EntityDecoder[SyncIO, SimpleCirceHttpError] = simpleCirceHttpErrorJsonEntityDecoder
-      val error: SimpleCirceHttpError = SimpleCirceHttpError(
+      val error: SimpleHttpError = SimpleHttpError(
         NonEmptyString("about:blank"),
         NonEmptyString("Blank Error"),
         HttpStatus(501),
@@ -38,21 +37,14 @@ final class CirceHttpErrorToResponseTest extends BaseTest {
             SyncIO(resp.status.code shouldBe 501) *>
               SyncIO(
                 resp.headers.get(`Content-Type`) shouldBe Some(`Content-Type`(MediaType.application.`problem+json`))
-              ) *> resp.as[SimpleCirceHttpError].flatMap(value => SyncIO(value shouldBe error))
+              ) *> resp.as[SimpleHttpError].flatMap(value => SyncIO(value shouldBe error))
           }
         )
     }
 
   it should "yield a application/json+problem with a 501 status when a specific CirceHttpProblem is raised" in
     sio {
-      implicit val ed: EntityDecoder[SyncIO, SimpleCirceHttpProblem] = simpleCirceHttpProblemJsonEntityDecoder
-      val error: SimpleCirceHttpProblem = SimpleCirceHttpProblem(
-        Some("about:blank"),
-        Some("Blank Error"),
-        Some(501),
-        None,
-        None
-      )
+      val error: SimpleHttpProblem = SimpleHttpProblem(Some("about:blank"), Some("Blank Error"), Some(501), None, None)
 
       failingHttpRoutesJson(error)
         .run(testRequest)
@@ -62,7 +54,7 @@ final class CirceHttpErrorToResponseTest extends BaseTest {
             SyncIO(resp.status.code shouldBe 501) *>
               SyncIO(
                 resp.headers.get(`Content-Type`) shouldBe Some(`Content-Type`(MediaType.application.`problem+json`))
-              ) *> resp.as[SimpleCirceHttpProblem].flatMap(value => SyncIO(value shouldBe error))
+              ) *> resp.as[SimpleHttpProblem].flatMap(value => SyncIO(value shouldBe error))
           }
         )
     }

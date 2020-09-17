@@ -60,7 +60,7 @@ import scala.util._
   * place with any code currently using `Throwable` as the default bottom
   * error type.
   */
-trait Error extends RuntimeException with Product with Serializable {
+trait Error extends RuntimeException {
 
   /** The primary error message for contexts in which a single value is
     * required, e.g. `Throwable#getMessage`.

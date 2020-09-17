@@ -74,3 +74,19 @@ trait HttpProblem extends Error {
         )
     )
 }
+
+object HttpProblem {
+
+  /** The trivial implementation of [[HttpProblem]].
+    *
+    * @note [[HttpError#SimpleHttpError]], or a subtype of [[HttpError]], is
+    *       recommended when throwing new errors.
+    */
+  final case class SimpleHttpProblem(
+    override val `type`: Option[String],
+    override val title: Option[String],
+    override val status: Option[Int],
+    override val detail: Option[String],
+    override val instance: Option[String]
+  ) extends HttpProblem
+}

@@ -2,39 +2,62 @@ package io.isomarcte.errors4s.http4s
 
 import cats.effect._
 import io.circe._
-import io.isomarcte.errors4s.http.circe.CirceHttpError._
-import io.isomarcte.errors4s.http.circe.CirceHttpProblem._
+import io.circe.syntax._
+import io.isomarcte.errors4s.http.HttpError._
+import io.isomarcte.errors4s.http.HttpProblem._
 import io.isomarcte.errors4s.http.circe._
+import io.isomarcte.errors4s.http.circe.implicits._
+import io.isomarcte.errors4s.http.{circe => _, _}
 import org.http4s._
 import org.http4s.circe._
 import org.http4s.headers._
 
 package object circe {
-  def circeHttpProblemJsonEntityEncoder[F[_]]: EntityEncoder[F, CirceHttpProblem] =
+  def circeHttpProblemJsonEntityEncoder[F[_]]: EntityEncoder[F, ExtensibleCirceHttpProblem] =
     EntityEncoder[F, Json]
-      .contramap((value: CirceHttpProblem) => value.toJson)
+      .contramap((value: ExtensibleCirceHttpProblem) => value.toJson)
       .withContentType(`Content-Type`(MediaType.application.`problem+json`))
 
-  def simpleCirceHttpProblemJsonEntityEncoder[F[_]]: EntityEncoder[F, SimpleCirceHttpProblem] =
-    circeHttpProblemJsonEntityEncoder[F].contramap(identity)
-
-  def simpleCirceHttpProblemJsonEntityDecoder[F[_]: Sync]: EntityDecoder[F, SimpleCirceHttpProblem] =
-    jsonOf[F, CirceHttpProblem.SimpleCirceHttpProblem]
-
-  def circeHttpProblemJsonEntityDecoder[F[_]: Sync]: EntityDecoder[F, CirceHttpProblem] =
+  def circeHttpProblemJsonEntityDecoder[F[_]: Sync]: EntityDecoder[F, ExtensibleCirceHttpProblem] =
     circeHttpProblemJsonEntityDecoder[F].widen
 
-  def circeHttpErrorJsonEntityEncoder[F[_]]: EntityEncoder[F, CirceHttpError] =
+  def circeHttpErrorJsonEntityEncoder[F[_]]: EntityEncoder[F, ExtensibleCirceHttpError] =
     EntityEncoder[F, Json]
-      .contramap((value: CirceHttpError) => value.toJson)
+      .contramap((value: ExtensibleCirceHttpError) => value.toJson)
       .withContentType(`Content-Type`(MediaType.application.`problem+json`))
 
-  def simpleCirceHttpErrorJsonEntityEncoder[F[_]]: EntityEncoder[F, SimpleCirceHttpError] =
-    circeHttpErrorJsonEntityEncoder.contramap(identity)
+  def circeHttpErrorJsonEntityDecoder[F[_]: Sync]: EntityDecoder[F, ExtensibleCirceHttpError] =
+    EntityDecoder
+      .decodeBy(MediaType.application.`problem+json`)(media => jsonOf[F, ExtensibleCirceHttpError].decode(media, false))
 
-  def simpleCirceHttpErrorJsonEntityDecoder[F[_]: Sync]: EntityDecoder[F, SimpleCirceHttpError] =
-    jsonOf[F, CirceHttpError.SimpleCirceHttpError]
+  implicit def simpleHttpErrorJsonEntityEncoder[F[_]]: EntityEncoder[F, SimpleHttpError] =
+    EntityEncoder[F, Json]
+      .contramap((sht: SimpleHttpError) => sht.asJson)
+      .withContentType(`Content-Type`(MediaType.application.`problem+json`))
 
-  def circeHttpErrorJsonEntityDecoder[F[_]: Sync]: EntityDecoder[F, CirceHttpError] =
-    simpleCirceHttpErrorJsonEntityDecoder[F].widen
+  implicit def simpleHttpErrorJsonEntityDecoder[F[_]: Sync]: EntityDecoder[F, SimpleHttpError] =
+    EntityDecoder
+      .decodeBy(MediaType.application.`problem+json`)(media => jsonOf[F, SimpleHttpError].decode(media, false))
+
+  def httpErrorJsonEntityEncoder[F[_]]: EntityEncoder[F, HttpError] =
+    simpleHttpErrorJsonEntityEncoder[F]
+      .contramap(value => SimpleHttpError(value.`type`, value.title, value.status, value.detail, value.instance))
+
+  def httpErrorJsonEntityDecoder[F[_]: Sync]: EntityDecoder[F, HttpError] = simpleHttpErrorJsonEntityDecoder[F].widen
+
+  implicit def simpleHttpProblemJsonEntityEncoder[F[_]]: EntityEncoder[F, SimpleHttpProblem] =
+    EntityEncoder[F, Json]
+      .contramap((sht: SimpleHttpProblem) => sht.asJson)
+      .withContentType(`Content-Type`(MediaType.application.`problem+json`))
+
+  implicit def simpleHttpProblemJsonEntityDecoder[F[_]: Sync]: EntityDecoder[F, SimpleHttpProblem] =
+    EntityDecoder
+      .decodeBy(MediaType.application.`problem+json`)(media => jsonOf[F, SimpleHttpProblem].decode(media, false))
+
+  def httpProblemJsonEntityEncoder[F[_]]: EntityEncoder[F, HttpProblem] =
+    simpleHttpProblemJsonEntityEncoder[F]
+      .contramap(value => SimpleHttpProblem(value.`type`, value.title, value.status, value.detail, value.instance))
+
+  def httpProblemJsonEntityDecoder[F[_]: Sync]: EntityDecoder[F, HttpProblem] =
+    simpleHttpProblemJsonEntityDecoder[F].widen
 }
