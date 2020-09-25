@@ -12,10 +12,10 @@ This project has the following goals,
 * [http-circe][http-circe]
 * [http4s-circe][http4s-circe]
 
-[core-scaladoc]: https://oss.sonatype.org/service/local/repositories/snapshots/archive/io/isomarcte/errors4s-core_2.13/0.0.1-SNAPSHOT/errors4s-core_2.13-0.0.1-SNAPSHOT-javadoc.jar/!/io/isomarcte/errors4s/core/index.html "Core Scaladoc"
-[http-scaladoc]: https://oss.sonatype.org/service/local/repositories/snapshots/archive/io/isomarcte/errors4s-http_2.13/0.0.1-SNAPSHOT/errors4s-http_2.13-0.0.1-SNAPSHOT-javadoc.jar/!/io/isomarcte/errors4s/http/index.html "Http Scaladoc"
+[core-scaladoc]: https://oss.sonatype.org/service/local/repositories/releases/archive/io/isomarcte/errors4s-core_2.13/0.0.2/errors4s-core_2.13-0.0.2-javadoc.jar/!/io/isomarcte/errors4s/core/index.html "Core Scaladoc"
+[http-scaladoc]: https://oss.sonatype.org/service/local/repositories/releases/archive/io/isomarcte/errors4s-http_2.13/0.0.2/errors4s-http_2.13-0.0.2-javadoc.jar/!/io/isomarcte/errors4s/http/index.html "Http Scaladoc"
 [http-circe]: https://oss.sonatype.org/service/local/repositories/snapshots/archive/io/isomarcte/errors4s-http-circe_2.13/0.0.1-SNAPSHOT/errors4s-http-circe_2.13-0.0.1-SNAPSHOT-javadoc.jar/!/io/isomarcte/errors4s/http/circe/index.html "Http Circe Scaladoc"
-[http4s-circe]: https://oss.sonatype.org/service/local/repositories/snapshots/archive/io/isomarcte/errors4s-http4s-circe_2.13/0.0.1-SNAPSHOT/errors4s-http4s-circe_2.13-0.0.1-SNAPSHOT-javadoc.jar/!/io/isomarcte/errors4s/http4s/circe/index.html "Http4s Circe Scaladoc"
+[http4s-circe]: https://oss.sonatype.org/service/local/repositories/releases/archive/io/isomarcte/errors4s-http4s-circe_2.13/0.0.2/errors4s-http4s-circe_2.13-0.0.2-javadoc.jar/!/io/isomarcte/errors4s/http4s/circe/index.html "Http4s Circe Scaladoc"
 
 # Overview #
 
@@ -231,13 +231,13 @@ In fact the various `withMessage` functions on the `Error` companion object, e.g
 
 ## HTTP ##
 
-The http module provides a subtype of `Error`, `HttpError`. This type implements the structure defined in [rfc-7807][rfc-7807]. Strictly speaking, `HttpError` is a bit _more restrictive_ than [RFC 7807][rfc-7807] requires. For a truly accurate mapping you can use the related `HttpProblem` type, but this is discouraged for anything other than parsing.
+The http module provides a subtype of `Error`, `HttpError`. This type implements the structure defined in [rfc-7807][rfc-7807]. Strictly speaking, `HttpError` is a bit _more restrictive_ than [RFC 7807][rfc-7807] requires. For a truly accurate mapping you can use the related `HttpProblem` type, but this is discouraged for anything other than parsing. Both types have a trivial implementation included in their companion objects. If you don't need extension keys in your [RFC 7807][rfc-7807] JSON, then these types are perfectly fine to use directly.
 
 This module does not specify an particular HTTP library and thus should be able to be integrated into any JVM HTTP library, nor does it specify a specific serialization library or format. As such, it is not very useful on its own. You'll probably want to look at the `http-circe` or `http4s-circe` modules. (PRs are welcome to add support for other JSON/XML libraries).
 
 ## HTTP Circe ##
 
-This module adds serialization support for the `HttpError` and `HttpProblem` types, via the `CirceHttpError` and `CirceHttpProblem` subtypes. As you might expect the JSON support for this is provided via the [circe][circe] library.
+This module adds serialization support for the `HttpError` and `HttpProblem` types via [Circe][circe] codecs for both of these traits as well as their trivial implementations. It also provides two types `ExtensibleCirceHttpError` and `ExtensibleCirceHttpProblem` which are the same as `HttpError` and `HttpProblem` except that they also include a reference to their own JSON representation. Extending these traits allows for adding [RFC 7807][rfc-7807] extension keys. That being said, if you don't need extension keys using the more simple `HttpError` type is recommended.
 
 Users of this library can use the `SimpleCirceHttpError` or `SimpleCirceHttpProblem` types directly, or mix in `CirceHttpError` or `CirceHttpProblem` into their own error ADTs.
 
@@ -245,7 +245,7 @@ Users of this library can use the `SimpleCirceHttpError` or `SimpleCirceHttpProb
 
 ## http4s Circe ##
 
-The http4s circe module provides a middleware which automatically transforms any `CirceHttpError` or `CirceHttpProblem` types into the appropriate response structures as defined in [rfc-7807][rfc-7807]. Currently it only supports JSON, but XML support is planned.
+The http4s circe module provides a middleware which automatically transforms any `HttpError` or `HttpProblem` types into the appropriate response structures as defined in [rfc-7807][rfc-7807]. Currently it only supports JSON, but XML support is planned.
 
 [rfc-7807]: https://tools.ietf.org/html/rfc7807 "RFC 7807"
 
