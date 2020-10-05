@@ -31,7 +31,7 @@ object ExtensibleCirceHttpError {
               override val `type`: NonEmptyString           = sht.`type`
               override val title: NonEmptyString            = sht.title
               override val status: HttpStatus               = sht.status
-              override val detail: Option[NonEmptyString]   = sht.detail
+              override val detail: Option[String]           = sht.detail
               override val instance: Option[NonEmptyString] = sht.instance
               override val toJson: Json                     = hcursor.value
             }

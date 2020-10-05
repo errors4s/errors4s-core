@@ -45,7 +45,7 @@ trait HttpError extends Error {
     *
     * @see [[https://tools.ietf.org/html/rfc7807#section-3.1]]
     */
-  def detail: Option[NonEmptyString]
+  def detail: Option[String]
 
   /** This SHOULD be a URI reference unique to this instance of the problem.
     *
@@ -53,7 +53,9 @@ trait HttpError extends Error {
     */
   def instance: Option[NonEmptyString]
 
-  final override lazy val primaryErrorMessage: NonEmptyString = detail.getOrElse(title)
+  final override lazy val primaryErrorMessage: NonEmptyString = detail
+    .flatMap(value => NonEmptyString.from(value).toOption)
+    .getOrElse(title)
 }
 
 object HttpError {
@@ -63,7 +65,7 @@ object HttpError {
     override val `type`: NonEmptyString,
     override val title: NonEmptyString,
     override val status: HttpStatus,
-    override val detail: Option[NonEmptyString],
+    override val detail: Option[String],
     override val instance: Option[NonEmptyString]
   ) extends HttpError
 }
