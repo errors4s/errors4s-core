@@ -245,7 +245,15 @@ Users of this library can use the `SimpleCirceHttpError` or `SimpleCirceHttpProb
 
 ## http4s Circe ##
 
-The http4s circe module provides a middleware which automatically transforms any `HttpError` or `HttpProblem` types into the appropriate response structures as defined in [rfc-7807][rfc-7807]. Currently it only supports JSON, but XML support is planned.
+The http4s circe module provides middlewares which operate on `HttpError` or `HttpProblem` values.
+
+### CirceHttpErrorToResponse ####
+
+`CirceHttpErrorToResponse` is a server middleware which automatically transforms any `HttpError` or `HttpProblem` types into the appropriate response structures as defined in [rfc-7807][rfc-7807].
+
+### PassthroughCirceHttpError ###
+
+`PassthroughCirceHttpError` is a client middleware which checks for `application/problem+json` responses, and if it finds one decodes it and re-raises it in the current `F` context. You can combine this with `CirceHttpErrorToResponse` in order to have a http service passthrough errors. _Caution_, you should only do this if trust the downstream service which may be generating the `application/problem+json`.
 
 [rfc-7807]: https://tools.ietf.org/html/rfc7807 "RFC 7807"
 

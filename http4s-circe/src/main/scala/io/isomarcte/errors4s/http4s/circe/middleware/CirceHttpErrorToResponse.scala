@@ -1,11 +1,6 @@
 package io.isomarcte.errors4s.http4s.circe.middleware
 
-import cats.data._
 import cats.effect._
-import cats.implicits._
-import io.isomarcte.errors4s.http._
-import io.isomarcte.errors4s.http4s.circe._
-import org.http4s._
 import org.http4s.server._
 
 object CirceHttpErrorToResponse {
@@ -19,24 +14,9 @@ object CirceHttpErrorToResponse {
     * values. Errors which should not have a `Response` body should be raised
     * as something else, e.g. `Error or `RuntimeException`.
     */
-  def json[F[_]](implicit F: Sync[F]): HttpMiddleware[F] = { (service: HttpRoutes[F]) =>
-    HttpRoutes((request: Request[F]) =>
-      OptionT(
-        service
-          .run(request)
-          .value
-          .recoverWith {
-            case e: HttpError =>
-              F.pure(Some(Response(status = Status(e.status.value)).withEntity(e)(httpErrorJsonEntityEncoder[F])))
-            case e: HttpProblem =>
-              F.pure(
-                Some(
-                  Response(status = e.status.fold(Status.InternalServerError)(value => Status(value)))
-                    .withEntity(e)(httpProblemJsonEntityEncoder[F])
-                )
-              )
-          }
-      )
-    )
-  }
+  @deprecated(
+    message = "Please use io.isomarcte.errors4s.http4s.circe.middleware.server.CirceHttpErrorToResponse",
+    since = "0.0.3"
+  )
+  def json[F[_]](implicit F: Sync[F]): HttpMiddleware[F] = server.CirceHttpErrorToResponse.json[F]
 }
