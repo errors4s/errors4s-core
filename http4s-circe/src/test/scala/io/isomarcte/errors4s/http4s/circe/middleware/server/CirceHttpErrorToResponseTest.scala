@@ -1,4 +1,4 @@
-package io.isomarcte.errors4s.http4s.circe.middleware
+package io.isomarcte.errors4s.http4s.circe.middleware.server
 
 import cats.data._
 import cats.effect._

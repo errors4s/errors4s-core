@@ -30,6 +30,7 @@ lazy val circeGenericA    = "circe-generic"
 lazy val circeRefinedA    = "circe-refined"
 lazy val fs2CoreA         = "fs2-core"
 lazy val http4sCirceA     = "http4s-circe"
+lazy val http4sClientA    = "http4s-client"
 lazy val http4sCoreA      = "http4s-core"
 lazy val http4sServerA    = "http4s-server"
 lazy val ip4sCoreA        = "ip4s-core"
@@ -174,6 +175,7 @@ lazy val `http4s-circe` = project
         circeG          %% circeCoreA    % circeV,
         fs2G            %% fs2CoreA      % fs2V,
         http4sG         %% http4sCirceA  % http4sV,
+        http4sG         %% http4sClientA % http4sV,
         http4sG         %% http4sCoreA   % http4sV,
         http4sG         %% http4sServerA % http4sV,
         refinedG        %% refinedA      % refinedV,
