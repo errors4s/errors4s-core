@@ -195,6 +195,10 @@ Error.SimpleError(NonEmptyString("Error during parsing"), Vector.empty, Vector.e
 
 In fact the various `withMessage` functions on the `Error` companion object, e.g. `Error.withMessage` or `Error.withMessageAndCause`, are just wrappers on `Error.SimpleError`.
 
+## http4s ##
+
+The http4s module provides utilities for working with http4s related types. These utilities are separate from the ones written for [rfc-7807][rfc-7807].
+
 ## HTTP ##
 
 The http module provides a subtype of `Error`, `HttpError`. This type implements the structure defined in [rfc-7807][rfc-7807]. Strictly speaking, `HttpError` is a bit _more restrictive_ than [RFC 7807][rfc-7807] requires. For a truly accurate mapping you can use the related `HttpProblem` type, but this is discouraged for anything other than parsing. Both types have a trivial implementation included in their companion objects. If you don't need extension keys in your [RFC 7807][rfc-7807] JSON, then these types are perfectly fine to use directly.
