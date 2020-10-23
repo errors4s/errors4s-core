@@ -91,7 +91,7 @@ object ResponseErrorProperties extends Properties("ResponseError") {
         if (errorBodyBytes.size <= 1) {
           ByteVector.empty
         } else {
-          errorBodyBytes.reverse.drop(1L).reverse
+          errorBodyBytes.dropRight(1L)
         }
 
       client
