@@ -27,6 +27,7 @@ lazy val typelevelG       = "org.typelevel"
 
 lazy val catsCoreA        = "cats-core"
 lazy val catsEffectA      = "cats-effect"
+lazy val catsKernelA      = "cats-kernel"
 lazy val circeCoreA       = "circe-core"
 lazy val circeGenericA    = "circe-generic"
 lazy val circeRefinedA    = "circe-refined"
@@ -160,9 +161,13 @@ lazy val http4s = project
     name := s"${projectName}-http4s",
     libraryDependencies ++=
       List(
-        http4sG     %% http4sClientA % http4sV,
+        fs2G        %% fs2CoreA      % fs2V,
         http4sG     %% http4sCoreA   % http4sV,
+        refinedG    %% refinedA      % refinedV,
         scodecG     %% scodecBitsA   % scodecBitsV,
+        typelevelG  %% catsCoreA     % catsV,
+        typelevelG  %% catsKernelA   % catsV,
+        http4sG     %% http4sClientA % http4sV     % Test,
         http4sG     %% http4sLawsA   % http4sV     % Test,
         scalacheckG %% scalacheckA   % scalacheckV % Test
       )
@@ -203,9 +208,8 @@ lazy val `http4s-circe` = project
         http4sG         %% http4sCoreA   % http4sV,
         http4sG         %% http4sServerA % http4sV,
         refinedG        %% refinedA      % refinedV,
-        shapelessG      %% shapelessA    % shapelessV,
         typelevelG      %% catsCoreA     % catsV,
-        typelevelG      %% catsCoreA     % catsV,
+        typelevelG      %% catsKernelA   % catsV,
         typelevelG      %% catsEffectA   % catsEffectV,
         scalatestG      %% scalatestA    % scalatestV % Test
       )
