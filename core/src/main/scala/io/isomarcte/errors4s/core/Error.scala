@@ -93,7 +93,8 @@ trait Error extends RuntimeException {
   final lazy val errorMessages: Vector[String] =
     Vector(primaryErrorMessage.value) ++ secondaryErrorMessages ++ causesErrorMessages
 
-  final override lazy val getMessage: String  = primaryErrorMessage.value
+  final override lazy val getMessage: String = errorMessages.mkString(", ")
+
   final override lazy val getCause: Throwable = causes.headOption.getOrElse(null)
 }
 
