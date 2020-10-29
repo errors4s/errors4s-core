@@ -1,7 +1,6 @@
 package io.isomarcte.errors4s.core
 
 import eu.timepit.refined.types.all._
-import scala.util._
 
 /** An error type which is guaranteed to be useful.
   *
@@ -153,31 +152,6 @@ object Error {
     */
   def fromThrowable(t: Throwable): SimpleError = SimpleError(errorMessageFromThrowable(t), Vector.empty, Vector(t))
 
-  /** We have to do this to work around a JRE 8 bug if we want to use
-    * class.getSimpleName for a fallback error message. This is not an issue
-    * on JRE >= 9. JDK 8 is EOL, so one would hope it is not being used
-    * anymore, but sadly that is not the case.
-    *
-    * @see [[https://github.com/scala/bug/issues/2034]]
-    */
-  private[this] lazy val jreVersion: Try[Int] = {
-    val versionParts: List[String] = System.getProperty("java.version").split("""\.""").toList.take(2)
-    versionParts match {
-      case ("1" :: version :: _) =>
-        Try(version.toInt)
-      case (version :: _) =>
-        Try(version.toInt)
-      case otherwise =>
-        Failure(withMessages(NonEmptyString("Unexpected version format"), otherwise.toString))
-    }
-  }
-
-  /** Determine if it is safe to call `java.lang.Class.getSimpleName`.
-    *
-    * @see [[https://github.com/scala/bug/issues/2034]]
-    */
-  private[this] lazy val isSafeToUseSimpleName: Boolean = this.jreVersion.fold(Function.const(false), _ > 8)
-
   /** Generate a `NonEmptyString` error message from any given `Throwable`.
     *
     * This is first attempt to use `getLocalizedMessage`, falling back to the
@@ -206,8 +180,7 @@ object Error {
           )
     }
 
-  /** Get the name of anything. This will call `_.getClass.getSimpleName` on JRE
-    * >= 9 and `_.getClass.getName`on JRE <= 8.
+  /** Get the name of anything.
     *
     * @note only use this function to attempt to provide information about a
     *       problem if everything else has failed. That is, if at all possible
@@ -215,17 +188,9 @@ object Error {
     *       information about an error in the case where no other useful
     *       information was provided, e.g. when
     *       `Throwable.getLocalizedMessage` is `null`.
-    *
-    * @see [[https://github.com/scala/bug/issues/2034]]
     */
   def nameOf(value: Any): String = {
     val c: Class[_] = value.getClass
-    if (isSafeToUseSimpleName) {
-      // Only safe on JRE >= 9
-      c.getSimpleName()
-    } else {
-      // Safe on JRE <= 8, but much less readable.
-      c.getName()
-    }
+    Option(c.getCanonicalName).getOrElse(c.getName)
   }
 }
