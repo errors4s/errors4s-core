@@ -104,7 +104,7 @@ lazy val publishSettings = List(
     else
       Some("releases" at nexus + "service/local/staging/deploy/maven2")
   },
-  scmInfo := Some(ScmInfo(projectUrl, "scm:git:git@github.com:isomarcte/http4s-active-requests.git")),
+  scmInfo := Some(ScmInfo(projectUrl, "scm:git:git@github.com:isomarcte/errors4s.git")),
   developers :=
     List(Developer("isomarcte", "David Strawn", "isomarcte@gmail.com", url("https://github.com/isomarcte"))),
   credentials += Credentials(Path.userHome / ".sbt" / ".credentials"),
