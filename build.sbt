@@ -4,7 +4,8 @@ import ReleaseTransformations._
 
 lazy val scala212      = "2.12.12"
 lazy val scala213      = "2.13.4"
-lazy val scalaVersions = Set(scala212, scala213)
+lazy val scala30       = "3.0.0-M2"
+lazy val scalaVersions = Set(scala212, scala213, scala30)
 lazy val projectName   = "errors4s"
 lazy val projectUrl    = url("https://github.com/isomarcte/errors4s")
 
@@ -70,7 +71,7 @@ ThisBuild / autoAPIMappings := true
 ThisBuild / crossScalaVersions := scalaVersions.toSeq
 ThisBuild / doc / scalacOptions --= List("-Werror", "-Xfatal-warnings")
 ThisBuild / organization := "io.isomarcte"
-ThisBuild / scalaVersion := scala213
+ThisBuild / scalaVersion := scala30
 ThisBuild / scalacOptions ++= List("-target:jvm-1.8")
 ThisBuild / scalafixDependencies ++= List(organizeImportsG %% organizeImportsA % organizeImportsV)
 ThisBuild / scalafixScalaBinaryVersion := "2.13"
@@ -90,7 +91,7 @@ ThisBuild / githubWorkflowBuildPreamble :=
 ThisBuild / githubWorkflowBuildPostamble := List(WorkflowStep.Sbt(List("test:doc")))
 
 lazy val commonSettings = List(
-  scalaVersion := scala213,
+  scalaVersion := scala30,
   addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1"),
   addCompilerPlugin(typelevelG    % "kind-projector"     % "0.11.2" cross CrossVersion.full),
   crossScalaVersions := scalaVersions.toSeq
