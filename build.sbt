@@ -65,26 +65,35 @@ lazy val vaultV           = "2.0.0"
 
 // Common Settings
 
-inThisBuild(
+ThisBuild / apiURL := Some(url("https://isomarcte.github.io/errors4s/api"))
+ThisBuild / autoAPIMappings := true
+ThisBuild / crossScalaVersions := scalaVersions.toSeq
+ThisBuild / doc / scalacOptions --= List("-Werror", "-Xfatal-warnings")
+ThisBuild / organization := "io.isomarcte"
+ThisBuild / scalaVersion := scala213
+ThisBuild / scalacOptions ++= List("-target:jvm-1.8")
+ThisBuild / scalafixDependencies ++= List(organizeImportsG %% organizeImportsA % organizeImportsV)
+ThisBuild / scalafixScalaBinaryVersion := "2.13"
+ThisBuild / semanticdbEnabled := true
+ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
+
+// GithubWorkflow
+ThisBuild / githubWorkflowPublishTargetBranches := Nil
+ThisBuild / githubWorkflowOSes := Set("macos-latest", "windows-latest", "ubuntu-latest").toList
+ThisBuild / githubWorkflowJavaVersions := Set("adopt@1.15", "adopt@1.11", "adopt@1.8").toList
+ThisBuild / githubWorkflowBuildPreamble :=
   List(
-    organization := "io.isomarcte",
-    scalaVersion := scala213,
-    scalafixScalaBinaryVersion := "2.13",
-    semanticdbEnabled := true,
-    semanticdbVersion := scalafixSemanticdb.revision,
-    scalafixDependencies ++= List(organizeImportsG %% organizeImportsA % organizeImportsV),
-    doc / scalacOptions --= List("-Werror", "-Xfatal-warnings"),
-    scalacOptions ++= List("-target:jvm-1.8")
+    WorkflowStep.Sbt(List("scalafmtSbtCheck", "scalafmtCheckAll")),
+    WorkflowStep.Run(List("sbt 'scalafixAll --check'")),
+    WorkflowStep.Sbt(List("doc"))
   )
-)
+ThisBuild / githubWorkflowBuildPostamble := List(WorkflowStep.Sbt(List("test:doc")))
 
 lazy val commonSettings = List(
   scalaVersion := scala213,
-  crossScalaVersions := scalaVersions.toSeq,
-  addCompilerPlugin(typelevelG    % "kind-projector"     % "0.11.0" cross CrossVersion.full),
   addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1"),
-  autoAPIMappings := true,
-  apiURL := Some(url("https://isomarcte.github.io/errors4s/api"))
+  addCompilerPlugin(typelevelG    % "kind-projector"     % "0.11.0" cross CrossVersion.full),
+  crossScalaVersions := scalaVersions.toSeq
 )
 
 // Publish Settings //
