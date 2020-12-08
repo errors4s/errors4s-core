@@ -92,9 +92,29 @@ ThisBuild / githubWorkflowBuildPostamble := List(WorkflowStep.Sbt(List("test:doc
 
 lazy val commonSettings = List(
   scalaVersion := scala30,
-  addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1"),
-  addCompilerPlugin(typelevelG    % "kind-projector"     % "0.11.2" cross CrossVersion.full),
-  crossScalaVersions := scalaVersions.toSeq
+  crossScalaVersions := scalaVersions.toSeq,
+  // Conditional on Scala Version
+  libraryDependencies ++= {
+    CrossVersion.partialVersion(scalaVersion.value) match {
+    case Some((2, _)) =>
+      List(
+        compilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1"),
+        compilerPlugin(typelevelG    % "kind-projector"     % "0.11.2" cross CrossVersion.full)
+      )
+    case _ =>
+      Nil
+  }
+  },
+  scalacOptions ++= {
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((2, _)) =>
+        Nil
+      case Some((3, _)) =>
+        List("-source", "3.0", "-language:strictEquality")
+      case _ =>
+        Nil
+    }
+  }
 )
 
 // Publish Settings //
