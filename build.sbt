@@ -134,7 +134,7 @@ def mimaPreviousVersions(version: VersionNumber): Set[VersionNumber] = {
   ).filter(_ > mimaMinVersion)
 }
 
-lazy val mimaMinVersion: VersionNumber = VersionNumber("0.0.5")
+lazy val mimaMinVersion: VersionNumber = VersionNumber("0.0.4")
 
 lazy val mimaCommonSettings: Seq[Def.Setting[_]] = List(
   mimaFailOnProblem := true,
