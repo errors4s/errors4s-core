@@ -225,9 +225,7 @@ releaseProcess :=
 lazy val errors4s = (project in file("."))
   .settings(commonSettings, publishSettings)
   .settings(List(name := projectName))
-  .settings(
-    mimaFailOnNoPrevious := false
-  )
+  .settings(mimaFailOnNoPrevious := false)
   .aggregate(core, http, http4s, `http-circe`, `http4s-circe`)
   .enablePlugins(ScalaUnidocPlugin)
 
