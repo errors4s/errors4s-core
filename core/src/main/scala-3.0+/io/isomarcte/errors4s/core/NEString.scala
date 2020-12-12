@@ -18,7 +18,7 @@ object NEString {
     }
   }
 
-  inline def isEmpty(inline value: String): Boolean =
+  private inline def isEmpty(inline value: String): Boolean =
     ${ isEmptyImpl('value) }
 
   private def isEmptyImpl(expr: Expr[String])(using Quotes): Expr[Boolean] =
