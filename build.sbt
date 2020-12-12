@@ -90,7 +90,7 @@ ThisBuild / githubWorkflowBuildPreamble :=
   )
 ThisBuild / githubWorkflowBuildPostamble := List(WorkflowStep.Sbt(List("test:doc")))
 
-lazy val commonSettings = List(
+lazy val commonSettings = Def.settings(
   scalaVersion := scala30,
   crossScalaVersions := scalaVersions.toSeq,
   // Conditional on Scala Version
@@ -105,14 +105,30 @@ lazy val commonSettings = List(
       Nil
   }
   },
-  scalacOptions ++= {
+  scalacOptions := {
     CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, _)) =>
-        Nil
+        scalacOptions.value
       case Some((3, _)) =>
-        List("-source", "3.0", "-language:strictEquality")
+        List("-source", "3.0", "-language:strictEquality", "-Ycheck-init")
       case _ =>
-        Nil
+        scalacOptions.value
+    }
+  },
+  // Based off of https://github.com/fthomas/refined/blob/macro-literals/build.sbt#L439
+  Seq(Compile, Test).map { config =>
+    (unmanagedSourceDirectories in config) ++= {
+      (unmanagedSourceDirectories in config).value.flatMap { dir: File =>
+        if (dir.getName != "scala") {
+          List(dir)
+        } else {
+          CrossVersion.partialVersion(scalaVersion.value) match {
+            case Some((n, _)) if n >= 3 => List(file(dir.getPath + "-3.0+"))
+            case Some((n, _)) if n < 3 => List(file(dir.getPath + "-3.0-"))
+            case _ => Nil
+          }
+        }
+      }
     }
   }
 )

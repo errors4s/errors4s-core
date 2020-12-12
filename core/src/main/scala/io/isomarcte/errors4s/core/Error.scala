@@ -1,7 +1,5 @@
 package io.isomarcte.errors4s.core
 
-import eu.timepit.refined.types.all._
-
 /** An error type which is guaranteed to be useful.
   *
   * In the Scala ecosystem, for better or worse, most errors end up getting
@@ -67,11 +65,11 @@ trait Error extends RuntimeException {
     * For code which understands `Error` it is recommended to use
     * [[#errorMessages]] instead. This gives you ''all'' the errors.
     */
-  def primaryErrorMessage: NonEmptyString
+  def primaryErrorMessage: NEString
 
   /** A set of secondary error messages. Often these are values interpolated
     * from the given context. This is why they are `String` values and not
-    * `NonEmptyString` values.
+    * `NEString` values.
     */
   def secondaryErrorMessages: Vector[String] = Vector.empty
 
@@ -101,45 +99,45 @@ object Error {
 
   /** The trivial implementation of [[Error]]. */
   final case class SimpleError(
-    override val primaryErrorMessage: NonEmptyString,
+    override val primaryErrorMessage: NEString,
     override val secondaryErrorMessages: Vector[String],
     override val causes: Vector[Throwable]
   ) extends Error
 
   object SimpleError {
-    def apply(primaryErrorMessage: NonEmptyString): SimpleError =
+    def apply(primaryErrorMessage: NEString): SimpleError =
       SimpleError(primaryErrorMessage, Vector.empty, Vector.empty)
   }
 
   /** Create an [[Error]] from an error message. */
-  def withMessage(errorMessage: NonEmptyString): SimpleError = SimpleError(errorMessage, Vector.empty, Vector.empty)
+  def withMessage(errorMessage: NEString): SimpleError = SimpleError(errorMessage, Vector.empty, Vector.empty)
 
   /** Create an [[Error]] from an error message and a single secondary error message. */
-  def withMessages(errorMessage: NonEmptyString, secondaryErrorMessage: String): SimpleError =
+  def withMessages(errorMessage: NEString, secondaryErrorMessage: String): SimpleError =
     SimpleError(errorMessage, Vector(secondaryErrorMessage), Vector.empty)
 
   /** Create an [[Error]] from an error message and a set of secondary error messages. */
-  def withMessages_(errorMessage: NonEmptyString, secondaryErrorMessages: Vector[String]): SimpleError =
+  def withMessages_(errorMessage: NEString, secondaryErrorMessages: Vector[String]): SimpleError =
     SimpleError(errorMessage, secondaryErrorMessages, Vector.empty)
 
   /** Create an [[Error]] from an error message and a `Throwable` cause. */
-  def withMessageAndCause(errorMessage: NonEmptyString, cause: Throwable): SimpleError =
+  def withMessageAndCause(errorMessage: NEString, cause: Throwable): SimpleError =
     SimpleError(errorMessage, Vector.empty, Vector(cause))
 
   /** Create an [[Error]] from an error message, a secondary error message, and a `Throwable` cause. */
-  def withMessagesAndCause(errorMessage: NonEmptyString, secondaryErrorMessage: String, cause: Throwable): SimpleError =
+  def withMessagesAndCause(errorMessage: NEString, secondaryErrorMessage: String, cause: Throwable): SimpleError =
     SimpleError(errorMessage, Vector(secondaryErrorMessage), Vector(cause))
 
   /** Create an [[Error]] from an error message, a secondary error message, and set of `Throwable` causes. */
   def withMessagesAndCauses(
-    errorMessage: NonEmptyString,
+    errorMessage: NEString,
     secondaryErrorMessage: String,
     causes: Vector[Throwable]
   ): SimpleError = SimpleError(errorMessage, Vector(secondaryErrorMessage), causes)
 
   /** Create an [[Error]] from an error message, a set of secondary error messages, and a set of `Throwable` causes. */
   def withMessagesAndCauses_(
-    errorMessage: NonEmptyString,
+    errorMessage: NEString,
     secondaryErrorMessages: Vector[String],
     causes: Vector[Throwable]
   ): SimpleError = SimpleError(errorMessage, secondaryErrorMessages, causes)
@@ -152,29 +150,29 @@ object Error {
     */
   def fromThrowable(t: Throwable): SimpleError = SimpleError(errorMessageFromThrowable(t), Vector.empty, Vector(t))
 
-  /** Generate a `NonEmptyString` error message from any given `Throwable`.
+  /** Generate a `NEString` error message from any given `Throwable`.
     *
     * This is first attempt to use `getLocalizedMessage`, falling back to the
     * `getClass.getSimpleName` if the JRE >= 9 otherwise `getClass.getName`,
     * finally if either of those yield the empty `String` (which should be
-    * impossible), a default `NonEmptyString` is used.
+    * impossible), a default `NEString` is used.
     *
     * @see [[https://github.com/scala/bug/issues/2034]]
     */
-  def errorMessageFromThrowable(t: Throwable): NonEmptyString =
+  def errorMessageFromThrowable(t: Throwable): NEString =
     t match {
       case t: Error =>
-        NonEmptyString
+        NEString
           .from(t.errorMessages.mkString(", "))
           .getOrElse(t.primaryErrorMessage /* should not be possible */ )
       case _ =>
-        NonEmptyString
+        NEString
           .from(
             // Handle possible null value
             Option(t.getLocalizedMessage()).getOrElse(nameOf(t))
           )
           .getOrElse(
-            NonEmptyString(
+            NEString(
               "Unknown Error: getLocalizedMessage was null and we could not get the class name. This is probably a bug in errors4s."
             )
           )
