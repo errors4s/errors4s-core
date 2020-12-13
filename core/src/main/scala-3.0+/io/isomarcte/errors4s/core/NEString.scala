@@ -1,6 +1,7 @@
 package io.isomarcte.errors4s.core
 
 import scala.compiletime.error
+import scala.language.`3.1`
 import scala.quoted._
 
 type NEString = NEString.opaques.NEString

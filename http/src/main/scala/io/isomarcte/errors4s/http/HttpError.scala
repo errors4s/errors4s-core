@@ -1,6 +1,5 @@
 package io.isomarcte.errors4s.http
 
-import eu.timepit.refined.types.all._
 import io.isomarcte.errors4s.core._
 
 /** An error type which represents an HTTP related problem.
@@ -21,7 +20,7 @@ trait HttpError extends Error {
     *
     * @see [[https://tools.ietf.org/html/rfc7807#section-3.1]]
     */
-  def `type`: NonEmptyString
+  def `type`: NEString
 
   /** The title of the error. Per RFC 7807 this should be a short human readable
     * summary of the problem. It should not change from occurrence to
@@ -30,7 +29,7 @@ trait HttpError extends Error {
     *
     * @see [[https://tools.ietf.org/html/rfc7807#section-3.1]]
     */
-  def title: NonEmptyString
+  def title: NEString
 
   /** The status code associated with the problem. It SHOULD map to status codes
     * for HTTP (RFC 7231).
@@ -51,10 +50,10 @@ trait HttpError extends Error {
     *
     * @see [[https://tools.ietf.org/html/rfc7807#section-3.1]]
     */
-  def instance: Option[NonEmptyString]
+  def instance: Option[NEString]
 
-  final override lazy val primaryErrorMessage: NonEmptyString = detail
-    .flatMap(value => NonEmptyString.from(value).toOption)
+  final override lazy val primaryErrorMessage: NEString = detail
+    .flatMap(value => NEString.from(value).toOption)
     .getOrElse(title)
 }
 
@@ -62,10 +61,10 @@ object HttpError {
 
   /** The trivial implementation of [[HttpError]]. */
   final case class SimpleHttpError(
-    override val `type`: NonEmptyString,
-    override val title: NonEmptyString,
+    override val `type`: NEString,
+    override val title: NEString,
     override val status: HttpStatus,
     override val detail: Option[String],
-    override val instance: Option[NonEmptyString]
+    override val instance: Option[NEString]
   ) extends HttpError
 }

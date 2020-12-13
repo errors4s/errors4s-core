@@ -64,6 +64,14 @@ lazy val scodecBitsV      = "1.1.22"
 lazy val shapelessV       = "2.3.3"
 lazy val vaultV           = "2.0.0"
 
+// Functions
+
+def isAtLeastScala3(sv: String): Boolean =
+  CrossVersion.partialVersion(sv) match {
+    case Some((n, _)) => n >= 3
+    case _ => false
+  }
+
 // Common Settings
 
 ThisBuild / apiURL := Some(url("https://isomarcte.github.io/errors4s/api"))
@@ -95,24 +103,20 @@ lazy val commonSettings = Def.settings(
   crossScalaVersions := scalaVersions.toSeq,
   // Conditional on Scala Version
   libraryDependencies ++= {
-    CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((2, _)) =>
+    if (isAtLeastScala3(scalaVersion.value)) {
+      Nil
+    } else {
       List(
         compilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1"),
         compilerPlugin(typelevelG    % "kind-projector"     % "0.11.2" cross CrossVersion.full)
       )
-    case _ =>
-      Nil
-  }
+    }
   },
   scalacOptions := {
-    CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((2, _)) =>
-        scalacOptions.value
-      case Some((3, _)) =>
-        List("-source", "3.0", "-language:strictEquality", "-Ycheck-init")
-      case _ =>
-        scalacOptions.value
+    if (isAtLeastScala3(scalaVersion.value)) {
+      List("-source", "3.0", "-language:strictEquality", "-Ycheck-init")
+    } else {
+      scalacOptions.value
     }
   },
   // Based off of https://github.com/fthomas/refined/blob/macro-literals/build.sbt#L439
@@ -122,10 +126,10 @@ lazy val commonSettings = Def.settings(
         if (dir.getName != "scala") {
           List(dir)
         } else {
-          CrossVersion.partialVersion(scalaVersion.value) match {
-            case Some((n, _)) if n >= 3 => List(file(dir.getPath + "-3.0+"))
-            case Some((n, _)) if n < 3 => List(file(dir.getPath + "-3.0-"))
-            case _ => Nil
+          if (isAtLeastScala3(scalaVersion.value)) {
+            List(file(dir.getPath + "-3.0+"))
+          } else {
+            List(file(dir.getPath + "-3.0-"))
           }
         }
       }
@@ -187,7 +191,17 @@ lazy val errors4s = (project in file("."))
 
 lazy val core = project
   .settings(commonSettings, publishSettings)
-  .settings(name := s"${projectName}-core", libraryDependencies ++= List(refinedG %% refinedA % refinedV))
+  .settings(
+    name := s"${projectName}-core",
+    libraryDependencies := {
+      libraryDependencies.value ++ (
+        if (isAtLeastScala3(scalaVersion.value)) {
+          Nil
+        } else {
+          List(refinedG %% refinedA % refinedV)
+        })
+    }
+  )
 
 // http //
 
@@ -195,7 +209,12 @@ lazy val http = project
   .settings(commonSettings, publishSettings)
   .settings(
     name := s"${projectName}-http",
-    libraryDependencies ++= List(refinedG %% refinedA % refinedV, shapelessG %% shapelessA % shapelessV)
+    libraryDependencies :=
+      libraryDependencies.value ++ (if (isAtLeastScala3(scalaVersion.value)) {
+        Nil
+      } else {
+        List(refinedG %% refinedA % refinedV, shapelessG %% shapelessA % shapelessV)
+      })
   )
   .dependsOn(core)
 

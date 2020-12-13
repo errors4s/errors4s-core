@@ -1,6 +1,5 @@
 package io.isomarcte.errors4s.http
 
-import eu.timepit.refined.types.all._
 import io.isomarcte.errors4s.core._
 
 /** An error type which represents an HTTP related problem.
@@ -59,16 +58,16 @@ trait HttpProblem extends Error {
     */
   def instance: Option[String]
 
-  final override lazy val primaryErrorMessage: NonEmptyString = detail
+  final override lazy val primaryErrorMessage: NEString = detail
     .orElse(title)
-    .flatMap(info => NonEmptyString.from(info).toOption)
+    .flatMap(info => NEString.from(info).toOption)
     .getOrElse(
-      NonEmptyString
+      NEString
         .from(
           s"No detail or title was provided by HttpProblem: ${Error.nameOf(this)}. It is recommended that the system generating this error correct it's encoding to provide better information about the issue per RFC 7807."
         )
         .getOrElse(
-          NonEmptyString(
+          NEString(
             "No valid error message could be generated. This is likely a bug in error4cats or a related library."
           )
         )
