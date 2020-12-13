@@ -1,12 +1,14 @@
 import ReleaseTransformations._
+import sbt.librarymanagement.VersionNumber
 
 // Constants //
 
+lazy val isomarcteOrg  = "io.isomarcte"
+lazy val projectName   = "errors4s"
+lazy val projectUrl    = url("https://github.com/isomarcte/errors4s")
 lazy val scala212      = "2.12.12"
 lazy val scala213      = "2.13.3"
 lazy val scalaVersions = Set(scala212, scala213)
-lazy val projectName   = "errors4s"
-lazy val projectUrl    = url("https://github.com/isomarcte/errors4s")
 
 // Groups //
 
@@ -69,7 +71,7 @@ ThisBuild / apiURL := Some(url("https://isomarcte.github.io/errors4s/api"))
 ThisBuild / autoAPIMappings := true
 ThisBuild / crossScalaVersions := scalaVersions.toSeq
 ThisBuild / doc / scalacOptions --= List("-Werror", "-Xfatal-warnings")
-ThisBuild / organization := "io.isomarcte"
+ThisBuild / organization := isomarcteOrg
 ThisBuild / scalaVersion := scala213
 ThisBuild / scalacOptions ++= List("-target:jvm-1.8")
 ThisBuild / scalafixDependencies ++= List(organizeImportsG %% organizeImportsA % organizeImportsV)
@@ -95,6 +97,86 @@ lazy val commonSettings = List(
   addCompilerPlugin(typelevelG    % "kind-projector"     % "0.11.0" cross CrossVersion.full),
   crossScalaVersions := scalaVersions.toSeq
 )
+
+// Mima //
+
+def mimaPreviousVersions(version: VersionNumber): Set[VersionNumber] = {
+  import versionNumberOrdering.mkOrderingOps
+  (
+    version match {
+      case version if version.numbers.size == 3 =>
+        version.numbers.toList match {
+          case major :: minor :: patch :: Nil =>
+            val start: Int =
+              if (major == 0L && minor == 0L) {
+                1
+              } else {
+                0
+              }
+            val forwardCompatible: Set[VersionNumber] =
+              Range(start, patch.toInt)
+                .toList
+                .map(p => VersionNumber(Seq(major, minor, p.toLong), Seq.empty, version.extras))
+                .toSet
+            val backwardCompatible: Set[VersionNumber] =
+              if (minor <= 0L) {
+                Set.empty
+              } else {
+                Set(VersionNumber(Seq(major, minor - 1L, 0L), Seq.empty, version.extras))
+              }
+            forwardCompatible ++ backwardCompatible
+          case _ =>
+            throw new AssertionError("Impossible branch hit in mimaPreviousVersions calculation")
+        }
+      case otherwise =>
+        throw new AssertionError(s"Unexpected version format: $otherwise")
+    }
+  ).filter(_ > mimaMinVersion)
+}
+
+lazy val mimaMinVersion: VersionNumber = VersionNumber("0.0.4")
+
+lazy val mimaCommonSettings: Seq[Def.Setting[_]] = List(
+  mimaFailOnProblem := true,
+  mimaReportSignatureProblems := true,
+  mimaCheckDirection := "both"
+)
+
+/** Remove if/when [[https://github.com/sbt/librarymanagement/pull/349]] is merged. */
+lazy val versionNumberOrdering: Ordering[VersionNumber] = {
+  def foldFunction[A](acc: Int, value: (A, A))(implicit ordering: Ordering[A]): Int =
+    if (acc == 0) {
+      ordering.compare(value._1, value._2)
+    } else {
+      acc
+    }
+
+  new Ordering[VersionNumber] {
+    override def compare(x: VersionNumber, y: VersionNumber): Int =
+      x.numbers.zipAll(y.numbers, Long.MinValue, Long.MinValue).foldLeft(0)(foldFunction[Long]) match {
+        case 0 =>
+          x.tags.zipAll(y.tags, "", "").foldLeft(0)(foldFunction[String]) match {
+            case 0 =>
+              x.extras.zipAll(y.extras, "", "").foldLeft(0)(foldFunction[String])
+            case otherwise =>
+              otherwise
+          }
+        case otherwise =>
+          otherwise
+      }
+  }
+}
+
+lazy val mimaSettings: Seq[Def.Setting[_]] =
+  List(
+    mimaPreviousArtifacts := {
+      val module: String = moduleName.value
+      mimaPreviousVersions(VersionNumber(version.value)).map(version => isomarcteOrg %% module % version.toString)
+    },
+    mimaFailOnNoPrevious := {
+      mimaPreviousVersions(VersionNumber(version.value)).nonEmpty
+    }
+  ) ++ mimaCommonSettings
 
 // Publish Settings //
 
@@ -143,29 +225,32 @@ releaseProcess :=
 lazy val errors4s = (project in file("."))
   .settings(commonSettings, publishSettings)
   .settings(List(name := projectName))
+  .settings(mimaFailOnNoPrevious := false)
   .aggregate(core, http, http4s, `http-circe`, `http4s-circe`)
   .enablePlugins(ScalaUnidocPlugin)
 
 // Core //
 
 lazy val core = project
-  .settings(commonSettings, publishSettings)
+  .settings(commonSettings, publishSettings, mimaSettings)
   .settings(name := s"${projectName}-core", libraryDependencies ++= List(refinedG %% refinedA % refinedV))
+  .enablePlugins(MimaPlugin)
 
 // http //
 
 lazy val http = project
-  .settings(commonSettings, publishSettings)
+  .settings(commonSettings, publishSettings, mimaSettings)
   .settings(
     name := s"${projectName}-http",
     libraryDependencies ++= List(refinedG %% refinedA % refinedV, shapelessG %% shapelessA % shapelessV)
   )
   .dependsOn(core)
+  .enablePlugins(MimaPlugin)
 
 // http4s //
 
 lazy val http4s = project
-  .settings(commonSettings, publishSettings)
+  .settings(commonSettings, publishSettings, mimaSettings)
   .settings(
     name := s"${projectName}-http4s",
     libraryDependencies ++=
@@ -182,11 +267,12 @@ lazy val http4s = project
       )
   )
   .dependsOn(core)
+  .enablePlugins(MimaPlugin)
 
 // circe //
 
 lazy val `http-circe` = project
-  .settings(commonSettings, publishSettings)
+  .settings(commonSettings, publishSettings, mimaSettings)
   .settings(
     name := s"${projectName}-http-circe",
     libraryDependencies ++=
@@ -200,11 +286,12 @@ lazy val `http-circe` = project
       )
   )
   .dependsOn(http)
+  .enablePlugins(MimaPlugin)
 
 // http4s //
 
 lazy val `http4s-circe` = project
-  .settings(commonSettings, publishSettings)
+  .settings(commonSettings, publishSettings, mimaSettings)
   .settings(
     name := s"${projectName}-http4s-circe",
     libraryDependencies ++=
@@ -224,6 +311,7 @@ lazy val `http4s-circe` = project
       )
   )
   .dependsOn(`http-circe`)
+  .enablePlugins(MimaPlugin)
 
 // MDoc //
 
