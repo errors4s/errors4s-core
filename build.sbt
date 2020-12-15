@@ -7,7 +7,7 @@ lazy val isomarcteOrg  = "io.isomarcte"
 lazy val projectName   = "errors4s"
 lazy val projectUrl    = url("https://github.com/isomarcte/errors4s")
 lazy val scala212      = "2.12.12"
-lazy val scala213      = "2.13.3"
+lazy val scala213      = "2.13.4"
 lazy val scalaVersions = Set(scala212, scala213)
 
 // Groups //
@@ -51,17 +51,17 @@ lazy val vaultA           = "vault"
 
 // Versions //
 
-lazy val catsEffectV      = "2.2.0"
-lazy val catsV            = "2.2.0"
+lazy val catsEffectV      = "2.3.0"
+lazy val catsV            = "2.3.0"
 lazy val circeV           = "0.13.0"
-lazy val fs2V             = "2.4.4"
-lazy val http4sV          = "0.21.8"
+lazy val fs2V             = "2.4.6"
+lazy val http4sV          = "0.21.14"
 lazy val ip4sV            = "1.4.0"
-lazy val organizeImportsV = "0.4.0"
-lazy val refinedV         = "0.9.17"
+lazy val organizeImportsV = "0.4.4"
+lazy val refinedV         = "0.9.19"
 lazy val scalacheckV      = "1.15.1"
-lazy val scalatestV       = "3.2.2"
-lazy val scodecBitsV      = "1.1.21"
+lazy val scalatestV       = "3.2.3"
+lazy val scodecBitsV      = "1.1.22"
 lazy val shapelessV       = "2.3.3"
 lazy val vaultV           = "2.0.0"
 
@@ -94,7 +94,7 @@ ThisBuild / githubWorkflowBuildPostamble := List(WorkflowStep.Sbt(List("test:doc
 lazy val commonSettings = List(
   scalaVersion := scala213,
   addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1"),
-  addCompilerPlugin(typelevelG    % "kind-projector"     % "0.11.0" cross CrossVersion.full),
+  addCompilerPlugin(typelevelG    % "kind-projector"     % "0.11.2" cross CrossVersion.full),
   crossScalaVersions := scalaVersions.toSeq
 )
 
