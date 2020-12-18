@@ -77,6 +77,39 @@ object ResponseError {
   )(implicit C: Stream.Compiler[F, F], F: FlatMap[F]): F[Throwable] =
     fromResponse_(ErrorBody.defaultMaxBodySizeBytes, requestUri, requestMethod)(response)
 
+  /** Create a [[ResponseError]] which will read, at most, the default number of
+    * bytes from the error response, given by
+    * [[ErrorBody#defaultMaxBodySizeBytes]].
+    *
+    * @note This constructor will extract the `org.http4s.Uri` and
+    *       `org.http4s.Status` from the `org.http4s.Request`. If the Uri is
+    *       expected to contain sensitive information which you do not want in
+    *       the [[ResponseError]] you should transform it ''before'' invoking
+    *       this constructor.
+    *
+    * @param request The `org.http4s.Request` from which to extract the Uri and
+    *                Status for the [[ResponseError]].
+    *
+    * @param response The `org.http4s.Response` which is the cause of this
+    *        error.
+    */
+  def from_[F[_]](
+    request: Request[F]
+  )(response: Response[F])(implicit C: Stream.Compiler[F, F], F: FlatMap[F]): F[ResponseError] = {
+    val maxBodySize: Long = ErrorBody.defaultMaxBodySizeBytes
+    ErrorBody
+      .fromResponse_(maxBodySize)(response)
+      .map(errorBody =>
+        ResponseError(response.status, response.headers, errorBody, maxBodySize, request.uri.some, request.method.some)
+      )
+  }
+
+  /** As [[#from_]], but widened to [[java.lang.Throwable]] as is commonly required by APIs.
+    */
+  def from[F[_]](request: Request[F])(
+    response: Response[F]
+  )(implicit C: Stream.Compiler[F, F], F: FlatMap[F]): F[Throwable] = from_[F](request)(response)(C, F).widen
+
   /** Algebraic Data Type for error response bodies.
     *
     * Members include, [[ErrorBody#FullErrorBody]] for when the entire error

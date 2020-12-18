@@ -6,3 +6,6 @@ target/
 
 !/website/siteConfig.js
 !/website/core/Footer.js
+
+/project/project
+/project/metals.sbt
