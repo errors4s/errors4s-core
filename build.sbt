@@ -1,9 +1,11 @@
 import ReleaseTransformations._
 import sbt.librarymanagement.VersionNumber
+import io.isomarcte.errors4s.sbt.ScalaApiDoc
 
 // Constants //
 
 lazy val isomarcteOrg  = "io.isomarcte"
+lazy val jreVersion    = "15"
 lazy val projectName   = "errors4s"
 lazy val projectUrl    = url("https://github.com/isomarcte/errors4s")
 lazy val scala212      = "2.12.12"
@@ -78,6 +80,16 @@ ThisBuild / scalafixDependencies ++= List(organizeImportsG %% organizeImportsA %
 ThisBuild / scalafixScalaBinaryVersion := "2.13"
 ThisBuild / semanticdbEnabled := true
 ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
+ThisBuild / doc / scalacOptions ++= List(
+  "-jdk-api-doc-base", s"https://docs.oracle.com/en/java/javase/${jreVersion}/docs/api"
+)
+ThisBuild / doc / apiMappings ++= {
+  val moduleLink: String => (java.io.File, java.net.URL) =
+    module => ScalaApiDoc.jreModuleLink(jreVersion)(module)
+  Map(
+    moduleLink("java.base")
+  )
+}
 
 // GithubWorkflow
 ThisBuild / githubWorkflowPublishTargetBranches := Nil
