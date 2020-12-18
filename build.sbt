@@ -1,6 +1,6 @@
 import ReleaseTransformations._
 import sbt.librarymanagement.VersionNumber
-import io.isomarcte.errors4s.sbt.ScalaApiDoc
+import _root_.io.isomarcte.errors4s.sbt.ScalaApiDoc
 
 // Constants //
 
