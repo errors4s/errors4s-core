@@ -80,12 +80,6 @@ ThisBuild / scalafixDependencies ++= List(organizeImportsG %% organizeImportsA %
 ThisBuild / scalafixScalaBinaryVersion := "2.13"
 ThisBuild / semanticdbEnabled := true
 ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
-ThisBuild / doc / scalacOptions ++=
-  List("-jdk-api-doc-base", s"https://docs.oracle.com/en/java/javase/${jreVersion}/docs/api")
-ThisBuild / doc / apiMappings ++= {
-  val moduleLink: String => (java.io.File, java.net.URL) = module => ScalaApiDoc.jreModuleLink(jreVersion)(module)
-  Map(moduleLink("java.base"))
-}
 
 // GithubWorkflow
 ThisBuild / githubWorkflowPublishTargetBranches := Nil
@@ -103,7 +97,19 @@ lazy val commonSettings = List(
   scalaVersion := scala213,
   addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1"),
   addCompilerPlugin(typelevelG    % "kind-projector"     % "0.11.2" cross CrossVersion.full),
-  crossScalaVersions := scalaVersions.toSeq
+  crossScalaVersions := scalaVersions.toSeq,
+  Compile / doc / scalacOptions ++= {
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((2, n)) if n <= 12 =>
+        List("-no-link-warnings")
+      case _ =>
+        List("-jdk-api-doc-base", s"https://docs.oracle.com/en/java/javase/${jreVersion}/docs/api")
+    }
+  },
+  Compile / doc / apiMappings ++= {
+    val moduleLink: String => (java.io.File, java.net.URL) = module => ScalaApiDoc.jreModuleLink(jreVersion)(module)
+    Map(moduleLink("java.base"))
+  }
 )
 
 // Mima //
