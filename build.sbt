@@ -80,15 +80,11 @@ ThisBuild / scalafixDependencies ++= List(organizeImportsG %% organizeImportsA %
 ThisBuild / scalafixScalaBinaryVersion := "2.13"
 ThisBuild / semanticdbEnabled := true
 ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
-ThisBuild / doc / scalacOptions ++= List(
-  "-jdk-api-doc-base", s"https://docs.oracle.com/en/java/javase/${jreVersion}/docs/api"
-)
+ThisBuild / doc / scalacOptions ++=
+  List("-jdk-api-doc-base", s"https://docs.oracle.com/en/java/javase/${jreVersion}/docs/api")
 ThisBuild / doc / apiMappings ++= {
-  val moduleLink: String => (java.io.File, java.net.URL) =
-    module => ScalaApiDoc.jreModuleLink(jreVersion)(module)
-  Map(
-    moduleLink("java.base")
-  )
+  val moduleLink: String => (java.io.File, java.net.URL) = module => ScalaApiDoc.jreModuleLink(jreVersion)(module)
+  Map(moduleLink("java.base"))
 }
 
 // GithubWorkflow
