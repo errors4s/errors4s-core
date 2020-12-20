@@ -1,4 +1,4 @@
-addSbtPlugin("ch.epfl.lamp"              % "sbt-dotty"                 % "0.4.6")
+addSbtPlugin("ch.epfl.lamp"              % "sbt-dotty"                 % "0.5.1")
 addSbtPlugin("ch.epfl.scala"             % "sbt-scalafix"              % "0.9.24")
 addSbtPlugin("com.codecommit"            % "sbt-github-actions"        % "0.9.5")
 addSbtPlugin("com.eed3si9n"              % "sbt-unidoc"                % "0.4.3")
@@ -8,5 +8,5 @@ addSbtPlugin("com.jsuereth"              % "sbt-pgp"                   % "2.1.1"
 addSbtPlugin("com.timushev.sbt"          % "sbt-updates"               % "0.5.1")
 addSbtPlugin("com.typesafe"              % "sbt-mima-plugin"           % "0.8.1")
 addSbtPlugin("io.github.davidgregory084" % "sbt-tpolecat"              % "0.1.16")
-addSbtPlugin("org.scalameta"             % "sbt-mdoc"                  % "2.2.13")
+addSbtPlugin("org.scalameta"             % "sbt-mdoc"                  % "2.2.14")
 addSbtPlugin("org.scalameta"             % "sbt-scalafmt"              % "2.4.2")

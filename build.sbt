@@ -54,25 +54,23 @@ lazy val vaultA           = "vault"
 // Versions //
 
 lazy val catsEffectV      = "2.3.0"
-lazy val catsV            = "2.3.0"
+lazy val catsV            = "2.3.1"
 lazy val circeV           = "0.13.0"
 lazy val fs2V             = "2.4.6"
 lazy val http4sV          = "0.21.14"
 lazy val ip4sV            = "1.4.0"
 lazy val organizeImportsV = "0.4.4"
 lazy val refinedV         = "0.9.19"
-lazy val scalacheckV      = "1.15.1"
+lazy val scalacheckV      = "1.15.2"
 lazy val scalatestV       = "3.2.3"
-lazy val scodecBitsV      = "1.1.22"
+lazy val scodecBitsV      = "1.1.23"
 lazy val shapelessV       = "2.3.3"
 lazy val vaultV           = "2.0.0"
 
 // Common Settings
 
-ThisBuild / apiURL := Some(url("https://isomarcte.github.io/errors4s/api"))
-ThisBuild / autoAPIMappings := true
 ThisBuild / crossScalaVersions := scalaVersions.toSeq
-ThisBuild / doc / scalacOptions --= List("-Werror", "-Xfatal-warnings")
+
 ThisBuild / organization := isomarcteOrg
 ThisBuild / scalaVersion := scala213
 ThisBuild / scalacOptions ++= List("-target:jvm-1.8")
@@ -89,15 +87,18 @@ ThisBuild / githubWorkflowBuildPreamble :=
   List(
     WorkflowStep.Sbt(List("scalafmtSbtCheck", "scalafmtCheckAll")),
     WorkflowStep.Run(List("sbt 'scalafixAll --check'")),
-    WorkflowStep.Sbt(List("doc"))
+    WorkflowStep.Sbt(List("doc", "unidoc"))
   )
 ThisBuild / githubWorkflowBuildPostamble := List(WorkflowStep.Sbt(List("test:doc")))
 
-lazy val commonSettings = List(
-  scalaVersion := scala213,
-  addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1"),
-  addCompilerPlugin(typelevelG    % "kind-projector"     % "0.11.2" cross CrossVersion.full),
-  crossScalaVersions := scalaVersions.toSeq,
+lazy val docSettings: List[Def.Setting[_]] = List(
+  apiURL :=
+    Some(url(s"https://www.javadoc.io/doc/io.isomarcte/errors4s_${scalaBinaryVersion.value}/latest/index.html")),
+  autoAPIMappings := true,
+  Compile / doc / apiMappings ++= {
+    val moduleLink: String => (java.io.File, java.net.URL) = module => ScalaApiDoc.jreModuleLink(jreVersion)(module)
+    Map(moduleLink("java.base"))
+  },
   Compile / doc / scalacOptions ++= {
     CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((2, n)) if n <= 12 =>
@@ -105,12 +106,16 @@ lazy val commonSettings = List(
       case _ =>
         List("-jdk-api-doc-base", s"https://docs.oracle.com/en/java/javase/${jreVersion}/docs/api")
     }
-  },
-  Compile / doc / apiMappings ++= {
-    val moduleLink: String => (java.io.File, java.net.URL) = module => ScalaApiDoc.jreModuleLink(jreVersion)(module)
-    Map(moduleLink("java.base"))
   }
 )
+
+lazy val commonSettings: List[Def.Setting[_]] =
+  List(
+    scalaVersion := scala213,
+    addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1"),
+    addCompilerPlugin(typelevelG    % "kind-projector"     % "0.11.2" cross CrossVersion.full),
+    crossScalaVersions := scalaVersions.toSeq
+  ) ++ docSettings
 
 // Mima //
 
