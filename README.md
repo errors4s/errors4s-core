@@ -2,7 +2,7 @@
 
 This project has the following goals,
 
-* Provide a better base type for errors than [[java.lang.Throwable]].
+* Provide a better base type for errors than `Throwable`.
 * Provide an implementation of [RFC 7807][rfc-7807]
 
 # ScalaDoc #
@@ -19,13 +19,13 @@ This project has the following goals,
 
 # Overview #
 
-This project provides a better root error type `Error` which extends [[java.lang.Throwable]] but provides better minimum constraints on what must be declared with the error. The `core` module has one  dependencies, [refined][refined]. [refined][refined] is used to enforce the fundamental concept of `errors4s`, when throwing an error you must provide enough information to make that error _useful_.
+This project provides a better root error type `Error` which extends `Throwable` but provides better minimum constraints on what must be declared with the error. The `core` module has one  dependencies, [refined][refined]. [refined][refined] is used to enforce the fundamental concept of `errors4s`, when throwing an error you must provide enough information to make that error _useful_.
 
 # Why #
 
 Before we discuss the details of this project, it might be helpful for a moment to motivate its existence.
 
-In both OO and FP Scala code, it is common to use [[java.lang.Throwable]] as the root type for errors. This is convenient as it allows for simple interoperability with existing JVM/Java code. [[java.lang.Throwable]] however has several less than helpful constructions. For example,
+In both OO and FP Scala code, it is common to use `Throwable` as the root type for errors. This is convenient as it allows for simple interoperability with existing JVM/Java code. `Throwable` however has several less than helpful constructions. For example,
 
 ```scala
 val t: Throwable = new RuntimeException()
@@ -75,7 +75,7 @@ In this example the library intends to indicate the type of the error in the cla
 
 ## Core ##
 
-The core module defines a new type `Error`. It extends `RuntimeException` (and thus [[java.lang.Throwable]]), but provides stronger constraints on the required information. It is an open `trait` so new domain specific error types are free to extend it (as is the common idiom with `RuntimeException`). The fundamental member of `Error` is `primaryErrorMessage`, a [refined][refined] `NonEmptyString`. For example, the following code will not compile.
+The core module defines a new type `Error`. It extends `RuntimeException` (and thus `Throwable`), but provides stronger constraints on the required information. It is an open `trait` so new domain specific error types are free to extend it (as is the common idiom with `RuntimeException`). The fundamental member of `Error` is `primaryErrorMessage`, a [refined][refined] `NonEmptyString`. For example, the following code will not compile.
 
 ```scala
 import eu.timepit.refined.types.all._
@@ -113,9 +113,9 @@ val e: Error = Error.withMessage(NonEmptyString("Failure During Parsing"))
 // )
 ```
 
-`primaryErrorMessage` represents the unchanging context of the error. In order to generate a `NonEmptyString` (as opposed to an `Either[String, NonEmptyString]`) at compile time you have to provide a literal [[java.lang.String]] value, e.g. `"Failure During Parsing"`. An interpolated value will not work, e.g. `s"Parsing failure: ${value}"`. For providing more context specific information about the error you should use the `secondaryErrorMessages: List[String]` field.
+`primaryErrorMessage` represents the unchanging context of the error. In order to generate a `NonEmptyString` (as opposed to an `Either[String, NonEmptyString]`) at compile time you have to provide a literal `String` value, e.g. `"Failure During Parsing"`. An interpolated value will not work, e.g. `s"Parsing failure: ${value}"`. For providing more context specific information about the error you should use the `secondaryErrorMessages: List[String]` field.
 
-Since `Error` extends [[java.lang.Throwable]] we can interoperate with code which expects [[java.lang.Throwable]] with no issues.
+Since `Error` extends `Throwable` we can interoperate with code which expects `Throwable` with no issues.
 
 ```scala
 def adaptError(t: Throwable): RuntimeException =
@@ -125,7 +125,7 @@ adaptError(e)
 // res4: RuntimeException = java.lang.RuntimeException: Failure During Parsing
 ```
 
-`Error` also provides a built in method to attempt to handle situations where the class name of some arbitrary [[java.lang.Throwable]] was intended to communicate why an error occurred. Going back to our original example, we can use `Error.fromThrowable` to get a much more useful error.
+`Error` also provides a built in method to attempt to handle situations where the class name of some arbitrary `Throwable` was intended to communicate why an error occurred. Going back to our original example, we can use `Error.fromThrowable` to get a much more useful error.
 
 ```scala
 import io.isomarcte.errors4s.core._
@@ -202,7 +202,7 @@ add("1", "a")
 // )
 ```
 
-The observant reader probably also noticed that both `Error.fromThrowable` and `Error.withMessageAndCause` inserted the underlying `InvalidIntException` into the `causes` `Vector`. `causes` is similar to `getCause` on [[java.lang.Throwable]] except that it allows the modeling of more than one cause. When you invoke `getCause` on `Error` you will get either the first error in the `Vector` or `null` (to comply with the [[java.lang.Throwable]] API).
+The observant reader probably also noticed that both `Error.fromThrowable` and `Error.withMessageAndCause` inserted the underlying `InvalidIntException` into the `causes` `Vector`. `causes` is similar to `getCause` on `Throwable` except that it allows the modeling of more than one cause. When you invoke `getCause` on `Error` you will get either the first error in the `Vector` or `null` (to comply with the `Throwable` API).
 
 When working with a domain specific error you extend `Error` just as you might extend `RuntimeException`.
 
