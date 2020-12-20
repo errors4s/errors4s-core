@@ -90,17 +90,12 @@ ThisBuild / githubWorkflowBuildPreamble :=
     WorkflowStep.Sbt(List("doc", "unidoc"))
   )
 ThisBuild / githubWorkflowBuildPostamble := List(WorkflowStep.Sbt(List("test:doc")))
-ThisBuild / githubWorkflowBuildMatrixExclusions := List(
-  // For some reason the `githubWorkflowCheck` step gets stuck with this
-  // particular combination.
-  MatrixExclude(
-    Map(
-      "os" -> "windows-latest",
-      "scala" -> "2.13.4",
-      "java" -> "adopt@1.15"
-    )
+ThisBuild / githubWorkflowBuildMatrixExclusions :=
+  List(
+    // For some reason the `githubWorkflowCheck` step gets stuck with this
+    // particular combination.
+    MatrixExclude(Map("os" -> "windows-latest", "scala" -> "2.13.4", "java" -> "adopt@1.15"))
   )
-)
 
 lazy val docSettings: List[Def.Setting[_]] = List(
   apiURL :=
