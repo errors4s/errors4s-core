@@ -255,7 +255,8 @@ lazy val errors4s = (project in file("."))
       mimaFailOnNoPrevious := false,
       Compile / packageBin / publishArtifact := false,
       Compile / packageSrc / publishArtifact := false,
-      Compile / packageDoc / mappings := (ScalaUnidoc / packageDoc / mappings).value
+      Compile / packageDoc / mappings :=
+        (ScalaUnidoc / packageDoc / mappings).value
     )
   )
   .aggregate(core, http, http4s, `http-circe`, `http4s-circe`)
