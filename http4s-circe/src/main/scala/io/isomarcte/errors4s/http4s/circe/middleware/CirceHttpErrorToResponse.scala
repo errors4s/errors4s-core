@@ -6,7 +6,7 @@ import org.http4s.server._
 object CirceHttpErrorToResponse {
 
   /** A middleware which catches `HttpError` or `HttpProblem` converts them in
-    * to the appropriate `Response` values. Other `Throwable` values are
+    * to the appropriate `Response` values. Other [[java.lang.Throwable]] values are
     * ignored, e.g. they are not caught.
     *
     * The recommended usage is to have your application raise errors which for

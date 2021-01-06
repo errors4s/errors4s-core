@@ -23,7 +23,7 @@ object NEString {
     ${ isEmptyImpl('value) }
 
   private def isEmptyImpl(expr: Expr[String])(using Quotes): Expr[Boolean] =
-    expr.unliftOrError match {
+    expr.valueOrError match {
       case "" => '{true}
       case _ => '{false}
     }

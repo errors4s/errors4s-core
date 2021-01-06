@@ -3,11 +3,13 @@ package io.isomarcte.errors4s.core
 /** An error type which is guaranteed to be useful.
   *
   * In the Scala ecosystem, for better or worse, most errors end up getting
-  * converted to a subtype of `Throwable`, usually `RuntimeException`. This is
-  * convenient, because it interoperates well with the JVM ecosystem, but it
-  * has several notable drawbacks.
+  * converted to a subtype of [[java.lang.Throwable]], usually
+  * [[java.lang.RuntimeException]]. This is convenient, because it
+  * interoperates well with the JVM ecosystem, but it has several notable
+  * drawbacks.
   *
-  * The primary draw back is that this valid instance of `RuntimeException`,
+  * The primary draw back is that this valid instance of
+  * [[java.lang.RuntimeException]],
   *
   * {{{
   * scala> val e = new RuntimeException
@@ -27,14 +29,16 @@ package io.isomarcte.errors4s.core
   * may seem, it is not uncommon to have exceptions like this in real world
   * production code.
   *
-  * [[Error]] is attempting to be the nicer version of `RuntimeException`,
-  * which is compatible with all existing error code and always gives you
-  * meaningful context about the error.
+  * [[Error]] is attempting to be the nicer version of
+  * [[java.lang.RuntimeException]], which is compatible with all existing
+  * error code and always gives you meaningful context about the error.
   *
   * There are three common idioms in Scala code for handling errors.
   *
-  *   - Create a custom Error ADT and then convert it to `Throwable` when needs be (which is not always the case).
-  *   - Extend `RuntimeException` (or sometimes `Exception`) and raise/throw the error.
+  *   - Create a custom Error ADT and then convert it to
+  *     [[java.lang.Throwable]] when needs be (which is not always the case).
+  *   - Extend [[java.lang.RuntimeException]] (or sometimes
+  *     [[java.lang.Exception]]) and raise/throw the error.
   *   - Create a `new RuntimeException(<message>)` and raise/throw that value directly.
   *
   * [[Error]] aims to support all these cases.
@@ -49,21 +53,22 @@ package io.isomarcte.errors4s.core
   * and raise them, similar to `new RuntimeException(<message>).
   *
   * [[Error]] also supports annotating [[Error#causes]], similar to
-  * `Throwable#getCause`, but more expressive. Rather than having a single
-  * `cause` (which may be `null`) [[Error]] allows for an arbitrary number of
-  * causes.
+  * [[java.lang.Throwable#getCause]], but more expressive. Rather than having
+  * a single `cause` (which may be `null`) [[Error]] allows for an arbitrary
+  * number of causes.
   *
-  * Finally, since [[Error]] extends `RuntimeException`, it can dropped into
-  * place with any code currently using `Throwable` as the default bottom
-  * error type.
+  * Finally, since [[Error]] extends [[java.lang.RuntimeException]], it can
+  * dropped into place with any code currently using [[java.lang.Throwable]] as the
+  * default bottom error type.
   */
 trait Error extends RuntimeException {
 
   /** The primary error message for contexts in which a single value is
-    * required, e.g. `Throwable#getMessage`.
+    * required, e.g. [[java.lang.Throwable#getMessage]].
     *
-    * For code which understands `Error` it is recommended to use
-    * [[#errorMessages]] instead. This gives you ''all'' the errors.
+    * For code which understands [[io.isomarcte.errors4s.core.Error]] it is
+    * recommended to use [[#errorMessages]] instead. This gives you ''all''
+    * the errors.
     */
   def primaryErrorMessage: NEString
 
@@ -73,8 +78,9 @@ trait Error extends RuntimeException {
     */
   def secondaryErrorMessages: Vector[String] = Vector.empty
 
-  /** A set of causes for this [[Error]]. The first value in this set, if any,
-    * will be the value returned by `Error.getCause`.
+  /** A set of causes for this [[io.isomarcte.errors4s.core.Error]]. The first
+    * value in this set, if any, will be the value returned by
+    * [[io.isomarcte.errors4s.core.Error#getCause]].
     */
   def causes: Vector[Throwable] = Vector.empty
 
@@ -83,9 +89,9 @@ trait Error extends RuntimeException {
     */
   final lazy val causesErrorMessages: Vector[String] = causes.map(value => Error.errorMessageFromThrowable(value).value)
 
-  /** All the error messages for this [[Error]]. This includes the
-    * [[#primaryErrorMessage]], the [[#secondaryErrorMessages]], and all error
-    * messages from [[#causesErrorMessages]].
+  /** All the error messages for this [[io.isomarcte.errors4s.core.Error]]. This
+    * includes the [[#primaryErrorMessage]], the [[#secondaryErrorMessages]],
+    * and all error messages from [[#causesErrorMessages]].
     */
   final lazy val errorMessages: Vector[String] =
     Vector(primaryErrorMessage.value) ++ secondaryErrorMessages ++ causesErrorMessages
@@ -105,8 +111,7 @@ object Error {
   ) extends Error
 
   object SimpleError {
-    def apply(primaryErrorMessage: NEString): SimpleError =
-      SimpleError(primaryErrorMessage, Vector.empty, Vector.empty)
+    def apply(primaryErrorMessage: NEString): SimpleError = SimpleError(primaryErrorMessage, Vector.empty, Vector.empty)
   }
 
   /** Create an [[Error]] from an error message. */
@@ -120,29 +125,29 @@ object Error {
   def withMessages_(errorMessage: NEString, secondaryErrorMessages: Vector[String]): SimpleError =
     SimpleError(errorMessage, secondaryErrorMessages, Vector.empty)
 
-  /** Create an [[Error]] from an error message and a `Throwable` cause. */
+  /** Create an [[Error]] from an error message and a [[java.lang.Throwable]] cause. */
   def withMessageAndCause(errorMessage: NEString, cause: Throwable): SimpleError =
     SimpleError(errorMessage, Vector.empty, Vector(cause))
 
-  /** Create an [[Error]] from an error message, a secondary error message, and a `Throwable` cause. */
+  /** Create an [[Error]] from an error message, a secondary error message, and a [[java.lang.Throwable]] cause. */
   def withMessagesAndCause(errorMessage: NEString, secondaryErrorMessage: String, cause: Throwable): SimpleError =
     SimpleError(errorMessage, Vector(secondaryErrorMessage), Vector(cause))
 
-  /** Create an [[Error]] from an error message, a secondary error message, and set of `Throwable` causes. */
+  /** Create an [[Error]] from an error message, a secondary error message, and set of [[java.lang.Throwable]] causes. */
   def withMessagesAndCauses(
     errorMessage: NEString,
     secondaryErrorMessage: String,
     causes: Vector[Throwable]
   ): SimpleError = SimpleError(errorMessage, Vector(secondaryErrorMessage), causes)
 
-  /** Create an [[Error]] from an error message, a set of secondary error messages, and a set of `Throwable` causes. */
+  /** Create an [[Error]] from an error message, a set of secondary error messages, and a set of [[java.lang.Throwable]] causes. */
   def withMessagesAndCauses_(
     errorMessage: NEString,
     secondaryErrorMessages: Vector[String],
     causes: Vector[Throwable]
   ): SimpleError = SimpleError(errorMessage, secondaryErrorMessages, causes)
 
-  /** Create an [[Error]] from an arbitrary `Throwable`.
+  /** Create an [[Error]] from an arbitrary [[java.lang.Throwable]].
     *
     * @note Use of this method is discouraged unless you are in a situation
     *       where you don't have any context at all. Otherwise use
@@ -150,21 +155,18 @@ object Error {
     */
   def fromThrowable(t: Throwable): SimpleError = SimpleError(errorMessageFromThrowable(t), Vector.empty, Vector(t))
 
-  /** Generate a `NEString` error message from any given `Throwable`.
+  /** Generate a `NEString` error message from any given [[java.lang.Throwable]].
     *
-    * This is first attempt to use `getLocalizedMessage`, falling back to the
-    * `getClass.getSimpleName` if the JRE >= 9 otherwise `getClass.getName`,
-    * finally if either of those yield the empty `String` (which should be
-    * impossible), a default `NEString` is used.
-    *
-    * @see [[https://github.com/scala/bug/issues/2034]]
+    * This is first attempt to use
+    * [[java.lang.Throwable#getLocalizedMessage]], falling back to the
+    * [[java.lang.Class#getCanonicalName]], then [[java.lang.Class#getName]],
+    * finally if either of those yield the empty [[java.lang.String]] (which
+    * should be impossible), a default `NEString` is used.
     */
   def errorMessageFromThrowable(t: Throwable): NEString =
     t match {
       case t: Error =>
-        NEString
-          .from(t.errorMessages.mkString(", "))
-          .getOrElse(t.primaryErrorMessage /* should not be possible */ )
+        NEString.from(t.errorMessages.mkString(", ")).getOrElse(t.primaryErrorMessage /* should not be possible */ )
       case _ =>
         NEString
           .from(

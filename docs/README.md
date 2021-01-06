@@ -7,15 +7,9 @@ This project has the following goals,
 
 # ScalaDoc #
 
-* [core][core-scaladoc]
-* [http][http-scaladoc]
-* [http-circe][http-circe]
-* [http4s-circe][http4s-circe]
+[The unified ScalaDoc may be viewed here][javadoc].
 
-[core-scaladoc]: https://oss.sonatype.org/service/local/repositories/releases/archive/io/isomarcte/errors4s-core_2.13/0.0.2/errors4s-core_2.13-0.0.2-javadoc.jar/!/io/isomarcte/errors4s/core/index.html "Core Scaladoc"
-[http-scaladoc]: https://oss.sonatype.org/service/local/repositories/releases/archive/io/isomarcte/errors4s-http_2.13/0.0.2/errors4s-http_2.13-0.0.2-javadoc.jar/!/io/isomarcte/errors4s/http/index.html "Http Scaladoc"
-[http-circe]: https://oss.sonatype.org/service/local/repositories/snapshots/archive/io/isomarcte/errors4s-http-circe_2.13/0.0.1-SNAPSHOT/errors4s-http-circe_2.13-0.0.1-SNAPSHOT-javadoc.jar/!/io/isomarcte/errors4s/http/circe/index.html "Http Circe Scaladoc"
-[http4s-circe]: https://oss.sonatype.org/service/local/repositories/releases/archive/io/isomarcte/errors4s-http4s-circe_2.13/0.0.2/errors4s-http4s-circe_2.13-0.0.2-javadoc.jar/!/io/isomarcte/errors4s/http4s/circe/index.html "Http4s Circe Scaladoc"
+[javadoc]: https://www.javadoc.io/doc/io.isomarcte/errors4s_2.13/latest/index.html "Scaladoc"
 
 # Overview #
 

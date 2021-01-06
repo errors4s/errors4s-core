@@ -1,13 +1,17 @@
 import ReleaseTransformations._
+import sbt.librarymanagement.VersionNumber
+import _root_.io.isomarcte.errors4s.sbt.ScalaApiDoc
 
 // Constants //
 
-lazy val scala212      = "2.12.12"
-lazy val scala213      = "2.13.4"
-lazy val scala30       = "3.0.0-M2"
-lazy val scalaVersions = Set(scala212, scala213, scala30)
+lazy val isomarcteOrg  = "io.isomarcte"
+lazy val jreVersion    = "15"
 lazy val projectName   = "errors4s"
 lazy val projectUrl    = url("https://github.com/isomarcte/errors4s")
+lazy val scala212      = "2.12.12"
+lazy val scala213      = "2.13.4"
+lazy val scala30       = "3.0.0-M3"
+lazy val scalaVersions = Set(scala212, scala213, scala30)
 
 // Groups //
 
@@ -51,16 +55,16 @@ lazy val vaultA           = "vault"
 // Versions //
 
 lazy val catsEffectV      = "2.3.0"
-lazy val catsV            = "2.3.0"
+lazy val catsV            = "2.3.1"
 lazy val circeV           = "0.13.0"
 lazy val fs2V             = "2.4.6"
-lazy val http4sV          = "0.21.13"
+lazy val http4sV          = "0.21.14"
 lazy val ip4sV            = "1.4.0"
 lazy val organizeImportsV = "0.4.4"
 lazy val refinedV         = "0.9.19"
-lazy val scalacheckV      = "1.15.1"
+lazy val scalacheckV      = "1.15.2"
 lazy val scalatestV       = "3.2.3"
-lazy val scodecBitsV      = "1.1.22"
+lazy val scodecBitsV      = "1.1.23"
 lazy val shapelessV       = "2.3.3"
 lazy val vaultV           = "2.0.0"
 
@@ -68,18 +72,18 @@ lazy val vaultV           = "2.0.0"
 
 def isAtLeastScala3(sv: String): Boolean =
   CrossVersion.partialVersion(sv) match {
-    case Some((n, _)) => n >= 3
-    case _ => false
+    case Some((n, _)) =>
+      n >= 3
+    case _ =>
+      false
   }
 
 // Common Settings
 
-ThisBuild / apiURL := Some(url("https://isomarcte.github.io/errors4s/api"))
-ThisBuild / autoAPIMappings := true
 ThisBuild / crossScalaVersions := scalaVersions.toSeq
 ThisBuild / doc / scalacOptions --= List("-Werror", "-Xfatal-warnings")
-ThisBuild / organization := "io.isomarcte"
-ThisBuild / scalaVersion := scala30
+ThisBuild / organization := isomarcteOrg
+ThisBuild / scalaVersion := scala213
 ThisBuild / scalacOptions ++= List("-target:jvm-1.8")
 ThisBuild / scalafixDependencies ++= List(organizeImportsG %% organizeImportsA % organizeImportsV)
 ThisBuild / scalafixScalaBinaryVersion := "2.13"
@@ -94,48 +98,154 @@ ThisBuild / githubWorkflowBuildPreamble :=
   List(
     WorkflowStep.Sbt(List("scalafmtSbtCheck", "scalafmtCheckAll")),
     WorkflowStep.Run(List("sbt 'scalafixAll --check'")),
-    WorkflowStep.Sbt(List("doc"))
+    WorkflowStep.Sbt(List("doc", "unidoc"))
   )
 ThisBuild / githubWorkflowBuildPostamble := List(WorkflowStep.Sbt(List("test:doc")))
+ThisBuild / githubWorkflowBuildMatrixExclusions :=
+  List(
+    // For some reason the `githubWorkflowCheck` step gets stuck with this
+    // particular combination.
+    MatrixExclude(Map("os" -> "windows-latest", "scala" -> "2.13.4", "java" -> "adopt@1.15"))
+  )
 
-lazy val commonSettings = Def.settings(
-  scalaVersion := scala30,
-  crossScalaVersions := scalaVersions.toSeq,
-  // Conditional on Scala Version
-  libraryDependencies ++= {
-    if (isAtLeastScala3(scalaVersion.value)) {
-      Nil
-    } else {
-      List(
-        compilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1"),
-        compilerPlugin(typelevelG    % "kind-projector"     % "0.11.2" cross CrossVersion.full)
-      )
-    }
+lazy val docSettings: Seq[Def.Setting[_]] = List(
+  apiURL :=
+    Some(url(s"https://www.javadoc.io/doc/io.isomarcte/errors4s_${scalaBinaryVersion.value}/latest/index.html")),
+  autoAPIMappings := true,
+  Compile / doc / apiMappings ++= {
+    val moduleLink: String => (java.io.File, java.net.URL) = module => ScalaApiDoc.jreModuleLink(jreVersion)(module)
+    Map(moduleLink("java.base"))
   },
-  scalacOptions := {
-    if (isAtLeastScala3(scalaVersion.value)) {
-      List("-source", "3.0", "-language:strictEquality", "-Ycheck-init")
-    } else {
-      scalacOptions.value
-    }
-  },
-  // Based off of https://github.com/fthomas/refined/blob/macro-literals/build.sbt#L439
-  Seq(Compile, Test).map { config =>
-    (unmanagedSourceDirectories in config) ++= {
-      (unmanagedSourceDirectories in config).value.flatMap { dir: File =>
-        if (dir.getName != "scala") {
-          List(dir)
-        } else {
-          if (isAtLeastScala3(scalaVersion.value)) {
-            List(file(dir.getPath + "-3.0+"))
-          } else {
-            List(file(dir.getPath + "-3.0-"))
-          }
-        }
-      }
+  Compile / doc / scalacOptions ++= {
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((2, n)) if n <= 12 =>
+        List("-no-link-warnings")
+      case _ =>
+        List("-jdk-api-doc-base", s"https://docs.oracle.com/en/java/javase/${jreVersion}/docs/api")
     }
   }
 )
+
+lazy val commonSettings: Seq[Def.Setting[_]] =
+  Def.settings(
+    scalaVersion := scala213,
+    crossScalaVersions := scalaVersions.toSeq,
+    libraryDependencies ++= {
+      if (isAtLeastScala3(scalaVersion.value)) {
+        Nil
+      } else {
+        List(
+          compilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1"),
+          compilerPlugin(typelevelG    % "kind-projector"     % "0.11.2" cross CrossVersion.full)
+        )
+      }
+    },
+    scalacOptions := {
+      if (isAtLeastScala3(scalaVersion.value)) {
+        List("-source", "3.0", "-language:strictEquality", "-Ycheck-init")
+      } else {
+        scalacOptions.value
+      }
+    },
+    // Based off of https://github.com/fthomas/refined/blob/macro-literals/build.sbt#L439
+    Seq(Compile, Test).map { config =>
+      (unmanagedSourceDirectories in config) ++= {
+        (unmanagedSourceDirectories in config)
+          .value
+          .flatMap { dir: File =>
+            if (dir.getName != "scala") {
+              List(dir)
+            } else {
+              if (isAtLeastScala3(scalaVersion.value)) {
+                List(file(dir.getPath + "-3.0+"))
+              } else {
+                List(file(dir.getPath + "-3.0-"))
+              }
+            }
+          }
+      }
+    }
+  ) ++ docSettings
+
+// Mima //
+
+def mimaPreviousVersions(version: VersionNumber): Set[VersionNumber] = {
+  import versionNumberOrdering.mkOrderingOps
+  (
+    version match {
+      case version if version.numbers.size == 3 =>
+        version.numbers.toList match {
+          case major :: minor :: patch :: Nil =>
+            val start: Int =
+              if (major == 0L && minor == 0L) {
+                1
+              } else {
+                0
+              }
+            val forwardCompatible: Set[VersionNumber] =
+              Range(start, patch.toInt)
+                .toList
+                .map(p => VersionNumber(Seq(major, minor, p.toLong), Seq.empty, version.extras))
+                .toSet
+            val backwardCompatible: Set[VersionNumber] =
+              if (minor <= 0L) {
+                Set.empty
+              } else {
+                Set(VersionNumber(Seq(major, minor - 1L, 0L), Seq.empty, version.extras))
+              }
+            forwardCompatible ++ backwardCompatible
+          case _ =>
+            throw new AssertionError("Impossible branch hit in mimaPreviousVersions calculation")
+        }
+      case otherwise =>
+        throw new AssertionError(s"Unexpected version format: $otherwise")
+    }
+  ).filter(_ > mimaMinVersion)
+}
+
+lazy val mimaMinVersion: VersionNumber = VersionNumber("0.0.4")
+
+lazy val mimaCommonSettings: Seq[Def.Setting[_]] = List(
+  mimaFailOnProblem := false, // Temporary for the scala3 branch
+  mimaReportSignatureProblems := true,
+  mimaCheckDirection := "both"
+)
+
+/** Remove if/when [[https://github.com/sbt/librarymanagement/pull/349]] is merged. */
+lazy val versionNumberOrdering: Ordering[VersionNumber] = {
+  def foldFunction[A](acc: Int, value: (A, A))(implicit ordering: Ordering[A]): Int =
+    if (acc == 0) {
+      ordering.compare(value._1, value._2)
+    } else {
+      acc
+    }
+
+  new Ordering[VersionNumber] {
+    override def compare(x: VersionNumber, y: VersionNumber): Int =
+      x.numbers.zipAll(y.numbers, Long.MinValue, Long.MinValue).foldLeft(0)(foldFunction[Long]) match {
+        case 0 =>
+          x.tags.zipAll(y.tags, "", "").foldLeft(0)(foldFunction[String]) match {
+            case 0 =>
+              x.extras.zipAll(y.extras, "", "").foldLeft(0)(foldFunction[String])
+            case otherwise =>
+              otherwise
+          }
+        case otherwise =>
+          otherwise
+      }
+  }
+}
+
+lazy val mimaSettings: Seq[Def.Setting[_]] =
+  List(
+    mimaPreviousArtifacts := {
+      val module: String = moduleName.value
+      mimaPreviousVersions(VersionNumber(version.value)).map(version => isomarcteOrg %% module % version.toString)
+    },
+    mimaFailOnNoPrevious := {
+      mimaPreviousVersions(VersionNumber(version.value)).nonEmpty
+    }
+  ) ++ mimaCommonSettings
 
 // Publish Settings //
 
@@ -183,45 +293,57 @@ releaseProcess :=
 
 lazy val errors4s = (project in file("."))
   .settings(commonSettings, publishSettings)
-  .settings(List(name := projectName))
+  .settings(
+    List(
+      name := projectName,
+      mimaFailOnNoPrevious := false,
+      Compile / packageBin / publishArtifact := false,
+      Compile / packageSrc / publishArtifact := false,
+      Compile / packageDoc / mappings :=
+        (ScalaUnidoc / packageDoc / mappings).value
+    )
+  )
   .aggregate(core, http, http4s, `http-circe`, `http4s-circe`)
   .enablePlugins(ScalaUnidocPlugin)
 
 // Core //
 
 lazy val core = project
-  .settings(commonSettings, publishSettings)
+  .settings(commonSettings, publishSettings, mimaSettings)
   .settings(
     name := s"${projectName}-core",
     libraryDependencies := {
-      libraryDependencies.value ++ (
-        if (isAtLeastScala3(scalaVersion.value)) {
-          Nil
-        } else {
-          List(refinedG %% refinedA % refinedV)
-        })
+      libraryDependencies.value ++
+        (if (isAtLeastScala3(scalaVersion.value)) {
+           Nil
+         } else {
+           List(refinedG %% refinedA % refinedV)
+         })
     }
   )
+  .enablePlugins(MimaPlugin)
 
 // http //
 
 lazy val http = project
-  .settings(commonSettings, publishSettings)
+  .settings(commonSettings, publishSettings, mimaSettings)
   .settings(
     name := s"${projectName}-http",
     libraryDependencies :=
-      libraryDependencies.value ++ (if (isAtLeastScala3(scalaVersion.value)) {
-        Nil
-      } else {
-        List(refinedG %% refinedA % refinedV, shapelessG %% shapelessA % shapelessV)
-      })
+      libraryDependencies.value ++
+        (if (isAtLeastScala3(scalaVersion.value)) {
+           Nil
+         } else {
+           List(refinedG %% refinedA % refinedV, shapelessG %% shapelessA % shapelessV)
+         })
   )
   .dependsOn(core)
+  .enablePlugins(MimaPlugin)
 
 // http4s //
 
 lazy val http4s = project
-  .settings(commonSettings, publishSettings)
+  .settings(commonSettings, publishSettings, mimaSettings)
   .settings(
     name := s"${projectName}-http4s",
     libraryDependencies ++=
@@ -238,11 +360,12 @@ lazy val http4s = project
       )
   )
   .dependsOn(core)
+  .enablePlugins(MimaPlugin)
 
 // circe //
 
 lazy val `http-circe` = project
-  .settings(commonSettings, publishSettings)
+  .settings(commonSettings, publishSettings, mimaSettings)
   .settings(
     name := s"${projectName}-http-circe",
     libraryDependencies ++=
@@ -256,11 +379,12 @@ lazy val `http-circe` = project
       )
   )
   .dependsOn(http)
+  .enablePlugins(MimaPlugin)
 
 // http4s //
 
 lazy val `http4s-circe` = project
-  .settings(commonSettings, publishSettings)
+  .settings(commonSettings, publishSettings, mimaSettings)
   .settings(
     name := s"${projectName}-http4s-circe",
     libraryDependencies ++=
@@ -280,6 +404,7 @@ lazy val `http4s-circe` = project
       )
   )
   .dependsOn(`http-circe`)
+  .enablePlugins(MimaPlugin)
 
 // MDoc //
 
