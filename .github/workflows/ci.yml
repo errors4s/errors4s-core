@@ -75,4 +75,4 @@ jobs:
         run: sbt ++${{ matrix.scala }} test
 
       - shell: bash
-        run: 'sbt ++${{ matrix.scala }} test:doc'
+        run: 'sbt ++${{ matrix.scala }} test:doc versionPolicyCheck'
