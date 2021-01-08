@@ -25,6 +25,7 @@ lazy val scalacheckG      = "org.scalacheck"
 lazy val scalatestG       = "org.scalatest"
 lazy val scodecG          = "org.scodec"
 lazy val shapelessG       = "com.chuusai"
+lazy val slf4jG           = "org.slf4j"
 lazy val typelevelG       = "org.typelevel"
 
 // Artifacts //
@@ -42,6 +43,7 @@ lazy val http4sCoreA      = "http4s-core"
 lazy val http4sLawsA      = "http4s-laws"
 lazy val http4sServerA    = "http4s-server"
 lazy val ip4sCoreA        = "ip4s-core"
+lazy val jawnParserA      = "jawn-parser"
 lazy val organizeImportsA = "organize-imports"
 lazy val refinedA         = "refined"
 lazy val refinedCatsA     = "refined-cats"
@@ -49,6 +51,7 @@ lazy val scalacheckA      = "scalacheck"
 lazy val scalatestA       = "scalatest"
 lazy val scodecBitsA      = "scodec-bits"
 lazy val shapelessA       = "shapeless"
+lazy val slf4jApiA        = "slf4j-api"
 lazy val vaultA           = "vault"
 
 // Versions //
@@ -59,12 +62,14 @@ lazy val circeV           = "0.13.0"
 lazy val fs2V             = "2.5.0"
 lazy val http4sV          = "0.21.15"
 lazy val ip4sV            = "1.4.0"
+lazy val jawnParserV      = "1.0.1"
 lazy val organizeImportsV = "0.4.4"
 lazy val refinedV         = "0.9.20"
 lazy val scalacheckV      = "1.15.2"
 lazy val scalatestV       = "3.2.3"
 lazy val scodecBitsV      = "1.1.23"
 lazy val shapelessV       = "2.3.3"
+lazy val slf4jApiV        = "1.7.30"
 lazy val vaultV           = "2.0.0"
 
 // Common Settings
@@ -89,7 +94,7 @@ ThisBuild / githubWorkflowBuildPreamble :=
     WorkflowStep.Run(List("sbt 'scalafixAll --check'")),
     WorkflowStep.Sbt(List("doc", "unidoc"))
   )
-ThisBuild / githubWorkflowBuildPostamble := List(WorkflowStep.Sbt(List("test:doc")))
+ThisBuild / githubWorkflowBuildPostamble := List(WorkflowStep.Sbt(List("test:doc", "versionPolicyCheck")))
 ThisBuild / githubWorkflowBuildMatrixExclusions :=
   List(
     // For some reason the `githubWorkflowCheck` step gets stuck with this
@@ -120,46 +125,16 @@ lazy val commonSettings: List[Def.Setting[_]] =
     scalaVersion := scala213,
     addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1"),
     addCompilerPlugin(typelevelG    % "kind-projector"     % "0.11.2" cross CrossVersion.full),
-    crossScalaVersions := scalaVersions.toSeq
+    crossScalaVersions := scalaVersions.toSeq,
+    // sbt-version-policy
+    versionPolicyIntention := Compatibility.BinaryAndSourceCompatible,
+    versionPolicyDefaultReconciliation := Some(VersionCompatibility.Strict),
+    versionPolicyDependencyRules ++=
+      List("core", "http", "http4s", "http-circe", "http4s-circe")
+        .map(artifact => isomarcteOrg % s"errors4s-${artifact}_${scalaBinaryVersion.value}" % "pvp")
   ) ++ docSettings
 
 // Mima //
-
-def mimaPreviousVersions(version: VersionNumber): Set[VersionNumber] = {
-  import versionNumberOrdering.mkOrderingOps
-  (
-    version match {
-      case version if version.numbers.size == 3 =>
-        version.numbers.toList match {
-          case major :: minor :: patch :: Nil =>
-            val start: Int =
-              if (major == 0L && minor == 0L) {
-                1
-              } else {
-                0
-              }
-            val forwardCompatible: Set[VersionNumber] =
-              Range(start, patch.toInt)
-                .toList
-                .map(p => VersionNumber(Seq(major, minor, p.toLong), Seq.empty, version.extras))
-                .toSet
-            val backwardCompatible: Set[VersionNumber] =
-              if (minor <= 0L) {
-                Set.empty
-              } else {
-                Set(VersionNumber(Seq(major, minor - 1L, 0L), Seq.empty, version.extras))
-              }
-            forwardCompatible ++ backwardCompatible
-          case _ =>
-            throw new AssertionError("Impossible branch hit in mimaPreviousVersions calculation")
-        }
-      case otherwise =>
-        throw new AssertionError(s"Unexpected version format: $otherwise")
-    }
-  ).filter(_ > mimaMinVersion)
-}
-
-lazy val mimaMinVersion: VersionNumber = VersionNumber("0.0.4")
 
 lazy val mimaCommonSettings: Seq[Def.Setting[_]] = List(
   mimaFailOnProblem := true,
@@ -167,41 +142,7 @@ lazy val mimaCommonSettings: Seq[Def.Setting[_]] = List(
   mimaCheckDirection := "both"
 )
 
-/** Remove if/when [[https://github.com/sbt/librarymanagement/pull/349]] is merged. */
-lazy val versionNumberOrdering: Ordering[VersionNumber] = {
-  def foldFunction[A](acc: Int, value: (A, A))(implicit ordering: Ordering[A]): Int =
-    if (acc == 0) {
-      ordering.compare(value._1, value._2)
-    } else {
-      acc
-    }
-
-  new Ordering[VersionNumber] {
-    override def compare(x: VersionNumber, y: VersionNumber): Int =
-      x.numbers.zipAll(y.numbers, Long.MinValue, Long.MinValue).foldLeft(0)(foldFunction[Long]) match {
-        case 0 =>
-          x.tags.zipAll(y.tags, "", "").foldLeft(0)(foldFunction[String]) match {
-            case 0 =>
-              x.extras.zipAll(y.extras, "", "").foldLeft(0)(foldFunction[String])
-            case otherwise =>
-              otherwise
-          }
-        case otherwise =>
-          otherwise
-      }
-  }
-}
-
-lazy val mimaSettings: Seq[Def.Setting[_]] =
-  List(
-    mimaPreviousArtifacts := {
-      val module: String = moduleName.value
-      mimaPreviousVersions(VersionNumber(version.value)).map(version => isomarcteOrg %% module % version.toString)
-    },
-    mimaFailOnNoPrevious := {
-      mimaPreviousVersions(VersionNumber(version.value)).nonEmpty
-    }
-  ) ++ mimaCommonSettings
+lazy val mimaSettings: Seq[Def.Setting[_]] = mimaCommonSettings
 
 // Publish Settings //
 
@@ -237,6 +178,7 @@ releaseProcess :=
     runClean,
     runTest,
     setReleaseVersion,
+    releaseStepCommandAndRemaining("+versionCheck"),
     releaseStepCommandAndRemaining("+publishSigned"),
     commitReleaseVersion,
     tagRelease,
