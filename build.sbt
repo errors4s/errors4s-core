@@ -129,9 +129,9 @@ lazy val commonSettings: List[Def.Setting[_]] =
     // sbt-version-policy
     versionPolicyIntention := Compatibility.BinaryAndSourceCompatible,
     versionPolicyDefaultReconciliation := Some(VersionCompatibility.Strict),
-    versionPolicyDependencyRules ++= List("core", "http", "http4s", "http-circe", "http4s-circe").map(artifact =>
-      isomarcteOrg % s"errors4s-${artifact}_${scalaBinaryVersion.value}" % "pvp"
-    )
+    versionPolicyDependencyRules ++=
+      List("core", "http", "http4s", "http-circe", "http4s-circe")
+        .map(artifact => isomarcteOrg % s"errors4s-${artifact}_${scalaBinaryVersion.value}" % "pvp")
   ) ++ docSettings
 
 // Mima //
@@ -142,8 +142,7 @@ lazy val mimaCommonSettings: Seq[Def.Setting[_]] = List(
   mimaCheckDirection := "both"
 )
 
-lazy val mimaSettings: Seq[Def.Setting[_]] =
-  mimaCommonSettings
+lazy val mimaSettings: Seq[Def.Setting[_]] = mimaCommonSettings
 
 // Publish Settings //
 
