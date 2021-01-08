@@ -53,14 +53,14 @@ lazy val vaultA           = "vault"
 
 // Versions //
 
-lazy val catsEffectV      = "2.3.0"
+lazy val catsEffectV      = "2.3.1"
 lazy val catsV            = "2.3.1"
 lazy val circeV           = "0.13.0"
-lazy val fs2V             = "2.4.6"
-lazy val http4sV          = "0.21.14"
+lazy val fs2V             = "2.5.0"
+lazy val http4sV          = "0.21.15"
 lazy val ip4sV            = "1.4.0"
 lazy val organizeImportsV = "0.4.4"
-lazy val refinedV         = "0.9.19"
+lazy val refinedV         = "0.9.20"
 lazy val scalacheckV      = "1.15.2"
 lazy val scalatestV       = "3.2.3"
 lazy val scodecBitsV      = "1.1.23"
