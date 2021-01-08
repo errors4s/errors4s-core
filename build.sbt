@@ -92,6 +92,7 @@ ThisBuild / githubWorkflowBuildPreamble :=
   List(
     WorkflowStep.Sbt(List("scalafmtSbtCheck", "scalafmtCheckAll")),
     WorkflowStep.Run(List("sbt 'scalafixAll --check'")),
+    WorkflowStep.Run(List("./check-docs.sh")),
     WorkflowStep.Sbt(List("doc", "unidoc"))
   )
 ThisBuild / githubWorkflowBuildPostamble := List(WorkflowStep.Sbt(List("test:doc", "versionPolicyCheck")))
@@ -294,6 +295,11 @@ lazy val `http4s-circe` = project
 lazy val docs = project
   .in(file(s"${projectName}-docs"))
   .settings(commonSettings)
-  .settings(List(skip in publish := true, name := s"${projectName}-docs"))
+  .settings(
+    List(
+      skip in publish := true,
+      name := s"${projectName}-docs"
+    )
+  )
   .dependsOn(core, http, `http-circe`, `http4s-circe`)
   .enablePlugins(MdocPlugin)
