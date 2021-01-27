@@ -11,6 +11,12 @@ This project has the following goals,
 
 [javadoc]: https://www.javadoc.io/doc/io.isomarcte/errors4s_2.13/latest/index.html "Scaladoc"
 
+# Version Information #
+
+As of version 0.2.0.0, this project uses [Package Versioning Policy][pvp]. In addition to the standard PVP constraints, updates to the A version indicate a change to the dependency set which is known to binary incompatible and updates to the B version will indicate an internal binary incompatibility, e.g. a removed symbol.
+
+[pvp]: https://pvp.haskell.org/ "PVP"
+
 # Overview #
 
 This project provides a better root error type `Error` which extends `Throwable` but provides better minimum constraints on what must be declared with the error. The `core` module has one  dependencies, [refined][refined]. [refined][refined] is used to enforce the fundamental concept of `errors4s`, when throwing an error you must provide enough information to make that error _useful_.
