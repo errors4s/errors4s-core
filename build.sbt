@@ -101,6 +101,7 @@ ThisBuild / githubWorkflowBuildMatrixExclusions :=
     // particular combination.
     MatrixExclude(Map("os" -> "windows-latest", "scala" -> "2.13.4", "java" -> "adopt@1.15"))
   )
+ThisBuild / versionScheme := Some("pvp")
 
 lazy val docSettings: List[Def.Setting[_]] = List(
   apiURL :=
