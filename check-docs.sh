@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 
-set -e
+set -ex
 
 sbt docs/mdoc &>/dev/null
-diff -s ./README.md errors4s-docs/target/mdoc/README.md
+if diff -s ./README.md errors4s-docs/target/mdoc/README.md
+then
+    exit 0
+else
+    diff ./README.md errors4s-docs/target/mdoc/README.md
+    exit 1
+fi
