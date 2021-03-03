@@ -4,9 +4,8 @@ import cats.data._
 import cats.effect._
 import cats.implicits._
 import eu.timepit.refined.types.all._
-import io.isomarcte.errors4s.http.HttpError._
-import io.isomarcte.errors4s.http.HttpProblem._
 import io.isomarcte.errors4s.http._
+import io.isomarcte.errors4s.http.circe._
 import io.isomarcte.errors4s.http4s.circe._
 import org.http4s._
 import org.http4s.headers._
@@ -19,15 +18,10 @@ final class CirceHttpErrorToResponseTest extends BaseTest {
   private val testRequest: Request[SyncIO] = Request(method = Method.GET)
 
   "CirceHttpErrorToResponse.json middleware" should
-    "yield a application/json+problem with a 501 status when a specific CirceHttpError is raised" in
+    "yield a application/json+problem with a 501 status when a specific ExtensibleCirceHttpError is raised" in
     sio {
-      val error: SimpleHttpError = SimpleHttpError(
-        NonEmptyString("about:blank"),
-        NonEmptyString("Blank Error"),
-        HttpStatus(501),
-        None,
-        None
-      )
+      val error: ExtensibleCirceHttpError = ExtensibleCirceHttpError
+        .simple(NonEmptyString("about:blank"), NonEmptyString("Blank Error"), HttpStatus(501), None, None)
 
       failingHttpRoutesJson(error)
         .run(testRequest)
@@ -37,14 +31,15 @@ final class CirceHttpErrorToResponseTest extends BaseTest {
             SyncIO(resp.status.code shouldBe 501) *>
               SyncIO(
                 resp.headers.get(`Content-Type`) shouldBe Some(`Content-Type`(MediaType.application.`problem+json`))
-              ) *> resp.as[SimpleHttpError].flatMap(value => SyncIO(value shouldBe error))
+              ) *> resp.as[ExtensibleCirceHttpError].flatMap(value => SyncIO(value shouldBe error))
           }
         )
     }
 
-  it should "yield a application/json+problem with a 501 status when a specific CirceHttpProblem is raised" in
+  it should "yield a application/json+problem with a 501 status when a specific ExtensibleCirceHttpProblem is raised" in
     sio {
-      val error: SimpleHttpProblem = SimpleHttpProblem(Some("about:blank"), Some("Blank Error"), Some(501), None, None)
+      val error: ExtensibleCirceHttpProblem = ExtensibleCirceHttpProblem
+        .simple(Some("about:blank"), Some("Blank Error"), Some(501), None, None)
 
       failingHttpRoutesJson(error)
         .run(testRequest)
@@ -54,7 +49,7 @@ final class CirceHttpErrorToResponseTest extends BaseTest {
             SyncIO(resp.status.code shouldBe 501) *>
               SyncIO(
                 resp.headers.get(`Content-Type`) shouldBe Some(`Content-Type`(MediaType.application.`problem+json`))
-              ) *> resp.as[SimpleHttpProblem].flatMap(value => SyncIO(value shouldBe error))
+              ) *> resp.as[ExtensibleCirceHttpProblem].flatMap(value => SyncIO(value shouldBe error))
           }
         )
     }

@@ -1,42 +1,92 @@
 package io.isomarcte.errors4s.http.circe
 
+import cats.syntax.all._
 import eu.timepit.refined.types.all._
 import io.circe._
+import io.circe.refined._
+import io.circe.syntax._
 import io.isomarcte.errors4s.http._
-import io.isomarcte.errors4s.http.circe.implicits._
 
 trait ExtensibleCirceHttpError extends HttpError {
 
-  /** Convert this [[ExtensibleCirceHttpError]] to JSON
+  /** Additional fields beyond those defined in [[HttpError]].
     *
-    * @note We can't just use a `Encoder[ExtensibleCirceHttpError]` here because the
-    *       actual implementation may have extension members as defined in RFC
-    *       7807. Thus we have to force the concrete implementation to provide
-    *       the real JSON representation.
-    *
-    * @see [[https://tools.ietf.org/html/rfc7807#section-3.2]]
+    * @note This [[io.circe.JsonObject]] should ''not'' contain keys which
+    *       will conflict with the canonical fields in [[HttpError]].
     */
-  def toJson: Json
+  def additionalFields: JsonObject = JsonObject.empty
 }
 
 object ExtensibleCirceHttpError {
 
-  implicit def circeCodec: Codec[ExtensibleCirceHttpError] =
-    Codec.from[ExtensibleCirceHttpError](
-      Decoder.instance[ExtensibleCirceHttpError]((hcursor: HCursor) =>
-        Decoder[HttpError.SimpleHttpError]
-          .apply(hcursor)
-          .map(sht =>
-            new ExtensibleCirceHttpError {
-              override val `type`: NonEmptyString           = sht.`type`
-              override val title: NonEmptyString            = sht.title
-              override val status: HttpStatus               = sht.status
-              override val detail: Option[String]           = sht.detail
-              override val instance: Option[NonEmptyString] = sht.instance
-              override val toJson: Json                     = hcursor.value
-            }
-          )
-      ),
-      Encoder.instance[ExtensibleCirceHttpError](_.toJson)
+  final private[this] case class ExtensibleCirceHttpErrorImpl(
+    override val `type`: NonEmptyString,
+    override val title: NonEmptyString,
+    override val status: HttpStatus,
+    override val detail: Option[String],
+    override val instance: Option[NonEmptyString],
+    override val additionalFields: JsonObject
+  ) extends ExtensibleCirceHttpError {
+    final override lazy val toString: String =
+      s"ExtensibleCirceHttpError(type = ${`type`}, title = $title, status = $status, detail = $detail, instance = $instance, additionalFields = ${additionalFields.toString}"
+  }
+
+  def simpleWithAdditionalFields[F[_]](
+    `type`: NonEmptyString,
+    title: NonEmptyString,
+    status: HttpStatus,
+    detail: Option[String],
+    instance: Option[NonEmptyString],
+    additionalFields: JsonObject
+  ): ExtensibleCirceHttpError =
+    ExtensibleCirceHttpErrorImpl(`type`, title, status, detail, instance, filterRestrictedKeys(additionalFields))
+
+  def simple[F[_]](
+    `type`: NonEmptyString,
+    title: NonEmptyString,
+    status: HttpStatus,
+    detail: Option[String],
+    instance: Option[NonEmptyString]
+  ): ExtensibleCirceHttpError = simpleWithAdditionalFields(`type`, title, status, detail, instance, JsonObject.empty)
+
+  implicit lazy val circeCodec: Codec[ExtensibleCirceHttpError] = Codec.from[ExtensibleCirceHttpError](
+    Decoder.instance[ExtensibleCirceHttpError]((hcursor: HCursor) =>
+      (
+        hcursor.downField("type").as[NonEmptyString],
+        hcursor.downField("title").as[NonEmptyString],
+        hcursor.downField("status").as[HttpStatus],
+        hcursor.downField("detail").as[Option[String]],
+        hcursor.downField("instance").as[Option[NonEmptyString]],
+        hcursor.value.as[JsonObject]
+      ).mapN { case (typeValue, title, status, detail, instance, additionalFields) =>
+        simpleWithAdditionalFields(typeValue, title, status, detail, instance, additionalFields)
+      }
+    ),
+    Encoder.instance(value =>
+      Json.fromJsonObject(
+        JsonObject(
+          "type"     -> value.`type`.asJson,
+          "title"    -> value.title.asJson,
+          "status"   -> value.status.asJson,
+          "detail"   -> value.detail.asJson,
+          "instance" -> value.instance.asJson
+        ).deepMerge(filterRestrictedKeys(value.additionalFields))
+      )
     )
+  )
+
+  def fromHttpError(value: HttpError): ExtensibleCirceHttpError =
+    value match {
+      case value: ExtensibleCirceHttpError =>
+        value
+      case value =>
+        simpleWithAdditionalFields(
+          value.`type`,
+          value.title,
+          value.status,
+          value.detail,
+          value.instance,
+          JsonObject.empty
+        )
+    }
 }

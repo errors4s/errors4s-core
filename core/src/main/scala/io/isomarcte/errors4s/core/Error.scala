@@ -49,10 +49,10 @@ import eu.timepit.refined.types.all._
   * error handling code the ability to be generic when needed, but still
   * guarantees a reasonable error message.
   *
-  * Using the provided trivial implementation of [[Error]],
-  * [[Error#SimpleError]], you can convert your ADT type into a [[Error]] when
-  * needed or you can just create instances of [[Error#SimpleError]] directly
-  * and raise them, similar to `new RuntimeException(<message>).
+  * Using the provided trivial implementation of [[Error]], you can convert
+  * your ADT type into a [[Error]] when needed or you can just create
+  * instances of [[Error]] directly and raise them, similar to `new
+  * RuntimeException(<message>).
   *
   * [[Error]] also supports annotating [[Error#causes]], similar to
   * [[java.lang.Throwable#getCause]], but more expressive. Rather than having
@@ -105,50 +105,51 @@ trait Error extends RuntimeException {
 
 object Error {
 
-  /** The trivial implementation of [[Error]]. */
-  final case class SimpleError(
+  /** The trivial implementation of [[Error]].
+    *
+    * This is hidden to avoid binary compatibility issues.
+    */
+  final private[this] case class ErrorImpl(
     override val primaryErrorMessage: NonEmptyString,
     override val secondaryErrorMessages: Vector[String],
     override val causes: Vector[Throwable]
-  ) extends Error
-
-  object SimpleError {
-    def apply(primaryErrorMessage: NonEmptyString): SimpleError =
-      SimpleError(primaryErrorMessage, Vector.empty, Vector.empty)
+  ) extends Error {
+    final override lazy val toString: String =
+      s"Error(primaryErrorMessage = ${primaryErrorMessage}, secondaryErrorMessages = ${secondaryErrorMessages}, causes = ${causes})"
   }
 
   /** Create an [[Error]] from an error message. */
-  def withMessage(errorMessage: NonEmptyString): SimpleError = SimpleError(errorMessage, Vector.empty, Vector.empty)
+  def withMessage(errorMessage: NonEmptyString): Error = ErrorImpl(errorMessage, Vector.empty, Vector.empty)
 
   /** Create an [[Error]] from an error message and a single secondary error message. */
-  def withMessages(errorMessage: NonEmptyString, secondaryErrorMessage: String): SimpleError =
-    SimpleError(errorMessage, Vector(secondaryErrorMessage), Vector.empty)
+  def withMessages(errorMessage: NonEmptyString, secondaryErrorMessage: String): Error =
+    ErrorImpl(errorMessage, Vector(secondaryErrorMessage), Vector.empty)
 
   /** Create an [[Error]] from an error message and a set of secondary error messages. */
-  def withMessages_(errorMessage: NonEmptyString, secondaryErrorMessages: Vector[String]): SimpleError =
-    SimpleError(errorMessage, secondaryErrorMessages, Vector.empty)
+  def withMessages_(errorMessage: NonEmptyString, secondaryErrorMessages: Vector[String]): Error =
+    ErrorImpl(errorMessage, secondaryErrorMessages, Vector.empty)
 
   /** Create an [[Error]] from an error message and a [[java.lang.Throwable]] cause. */
-  def withMessageAndCause(errorMessage: NonEmptyString, cause: Throwable): SimpleError =
-    SimpleError(errorMessage, Vector.empty, Vector(cause))
+  def withMessageAndCause(errorMessage: NonEmptyString, cause: Throwable): Error =
+    ErrorImpl(errorMessage, Vector.empty, Vector(cause))
 
   /** Create an [[Error]] from an error message, a secondary error message, and a [[java.lang.Throwable]] cause. */
-  def withMessagesAndCause(errorMessage: NonEmptyString, secondaryErrorMessage: String, cause: Throwable): SimpleError =
-    SimpleError(errorMessage, Vector(secondaryErrorMessage), Vector(cause))
+  def withMessagesAndCause(errorMessage: NonEmptyString, secondaryErrorMessage: String, cause: Throwable): Error =
+    ErrorImpl(errorMessage, Vector(secondaryErrorMessage), Vector(cause))
 
   /** Create an [[Error]] from an error message, a secondary error message, and set of [[java.lang.Throwable]] causes. */
   def withMessagesAndCauses(
     errorMessage: NonEmptyString,
     secondaryErrorMessage: String,
     causes: Vector[Throwable]
-  ): SimpleError = SimpleError(errorMessage, Vector(secondaryErrorMessage), causes)
+  ): Error = ErrorImpl(errorMessage, Vector(secondaryErrorMessage), causes)
 
   /** Create an [[Error]] from an error message, a set of secondary error messages, and a set of [[java.lang.Throwable]] causes. */
   def withMessagesAndCauses_(
     errorMessage: NonEmptyString,
     secondaryErrorMessages: Vector[String],
     causes: Vector[Throwable]
-  ): SimpleError = SimpleError(errorMessage, secondaryErrorMessages, causes)
+  ): Error = ErrorImpl(errorMessage, secondaryErrorMessages, causes)
 
   /** Create an [[Error]] from an arbitrary [[java.lang.Throwable]].
     *
@@ -156,7 +157,7 @@ object Error {
     *       where you don't have any context at all. Otherwise use
     *       [[#withMessageAndCause]].
     */
-  def fromThrowable(t: Throwable): SimpleError = SimpleError(errorMessageFromThrowable(t), Vector.empty, Vector(t))
+  def fromThrowable(t: Throwable): Error = ErrorImpl(errorMessageFromThrowable(t), Vector.empty, Vector(t))
 
   /** Generate a `NonEmptyString` error message from any given [[java.lang.Throwable]].
     *
