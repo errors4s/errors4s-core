@@ -64,9 +64,6 @@ jobs:
         run: sbt 'scalafixAll --check'
 
       - shell: bash
-        run: ./check-docs.sh
-
-      - shell: bash
         run: sbt ++${{ matrix.scala }} doc unidoc
 
       - name: Check that workflows are up to date

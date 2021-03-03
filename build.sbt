@@ -92,7 +92,6 @@ ThisBuild / githubWorkflowBuildPreamble :=
   List(
     WorkflowStep.Sbt(List("scalafmtSbtCheck", "scalafmtCheckAll")),
     WorkflowStep.Run(List("sbt 'scalafixAll --check'")),
-    WorkflowStep.Run(List("./check-docs.sh")),
     WorkflowStep.Sbt(List("doc", "unidoc"))
   )
 ThisBuild / githubWorkflowBuildPostamble := List(WorkflowStep.Sbt(List("test:doc", "versionPolicyCheck")))
