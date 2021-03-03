@@ -8,7 +8,12 @@ import fs2._
 import org.http4s._
 import scodec.bits._
 
-/** Error type which can be used in the `or` method from http4s. */
+/** Error type which can be used in the `expectOr` method from http4s.
+  *
+  * @note If present, the query string on the request URI will be redacted. In
+  *       0.2.x.x this behavior will be configurable, but this can not be done
+  *       on 0.1.x without breaking binary compatibility.
+  */
 final case class ResponseError(
   status: Status,
   headers: Headers,
@@ -17,6 +22,25 @@ final case class ResponseError(
   requestUri: Option[Uri],
   requestMethod: Option[Method]
 ) extends Error {
+
+  /** We redact the query string because we can't be sure it is safe to
+    * render. It is not uncommon for sensitive parameters to be placed in the
+    * query string. In 0.2.x.x we will give users the ability to configure
+    * this, but we can't do that in 0.1.x without breaking binary
+    * compatibility.
+    */
+  private lazy val requestUriWithoutQuery: Option[Uri] = requestUri.map(value =>
+    value.copy(query =
+      Query(
+        value
+          .query
+          .pairs
+          .foldLeft(Vector.empty[Query.KeyValue]) { case (acc, (key, value)) =>
+            acc ++ Vector(key -> value.map(Function.const("<REDACTED>")))
+          }: _*
+      )
+    )
+  )
 
   private lazy val errorBodyMessages: Vector[String] = {
     import ResponseError.ErrorBody._
@@ -45,7 +69,7 @@ final case class ResponseError(
     .getOrElse(NonEmptyString("Unexpected response from HTTP call"))
 
   final override lazy val secondaryErrorMessages: Vector[String] =
-    requestUri.map(uri => s"Request URI: ${uri.renderString}").toVector ++
+    requestUriWithoutQuery.map(uri => s"Request URI: ${uri.renderString}").toVector ++
       requestMethod.map(method => s"Request Method: ${method.renderString}").toVector ++
       Vector(s"Status: ${status}", s"ResponseHeaders: ${headers}") ++ errorBodyMessages
 
