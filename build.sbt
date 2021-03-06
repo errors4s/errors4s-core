@@ -276,4 +276,5 @@ lazy val docs = project
   .in(file(s"${projectName}-docs"))
   .settings(commonSettings)
   .settings(List(skip in publish := true, name := s"${projectName}-docs"))
-  .dependsOn(core, http, `http-circe`, `http4s-circe`).enablePlugins(MdocPlugin)
+  .dependsOn(core, http, `http-circe`, `http4s-circe`)
+  .enablePlugins(MdocPlugin)
