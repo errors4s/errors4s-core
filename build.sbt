@@ -96,7 +96,7 @@ ThisBuild / githubWorkflowBuildPreamble :=
     WorkflowStep.Run(List("sbt 'scalafixAll --check'")),
     WorkflowStep.Sbt(List("doc", "unidoc"))
   )
-ThisBuild / githubWorkflowBuildPostamble := List(WorkflowStep.Sbt(List("test:doc", "versionPolicyCheck")))
+ThisBuild / githubWorkflowBuildPostamble := List(WorkflowStep.Sbt(List("test:doc", "versionSchemeEnforcerCheck")))
 ThisBuild / githubWorkflowBuildMatrixExclusions :=
   List(
     // For some reason the `githubWorkflowCheck` step gets stuck with this
