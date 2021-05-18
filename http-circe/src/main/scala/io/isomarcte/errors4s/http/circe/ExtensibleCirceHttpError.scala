@@ -1,11 +1,12 @@
 package io.isomarcte.errors4s.http.circe
 
 import cats.syntax.all._
-import eu.timepit.refined.types.all._
 import io.circe._
-import io.circe.refined._
 import io.circe.syntax._
+import io.isomarcte.errors4s.circe.instances._
+import io.isomarcte.errors4s.core._
 import io.isomarcte.errors4s.http._
+import io.isomarcte.errors4s.http.circe.implicits.httpStatusCodec
 
 trait ExtensibleCirceHttpError extends HttpError {
 

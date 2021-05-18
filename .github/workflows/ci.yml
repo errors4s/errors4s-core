@@ -62,4 +62,5 @@ jobs:
       - name: Build project
         run: sbt ++${{ matrix.scala }} test
 
-      - run: 'sbt ++${{ matrix.scala }} test:doc versionSchemeEnforcerCheck'
+      - shell: bash
+        run: 'sbt ++${{ matrix.scala }} test:doc versionSchemeEnforcerCheck '''';project core;++3.0.0;test'''''

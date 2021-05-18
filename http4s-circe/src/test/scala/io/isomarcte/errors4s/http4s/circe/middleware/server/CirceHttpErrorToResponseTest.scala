@@ -3,7 +3,7 @@ package io.isomarcte.errors4s.http4s.circe.middleware.server
 import cats.data._
 import cats.effect._
 import cats.implicits._
-import eu.timepit.refined.types.all._
+import io.isomarcte.errors4s.core.syntax.all._
 import io.isomarcte.errors4s.http._
 import io.isomarcte.errors4s.http.circe._
 import io.isomarcte.errors4s.http4s.circe._
@@ -21,7 +21,7 @@ final class CirceHttpErrorToResponseTest extends BaseTest {
     "yield a application/json+problem with a 501 status when a specific ExtensibleCirceHttpError is raised" in
     sio {
       val error: ExtensibleCirceHttpError = ExtensibleCirceHttpError
-        .simple(NonEmptyString("about:blank"), NonEmptyString("Blank Error"), HttpStatus(501), None, None)
+        .simple(nes"about:blank", nes"Blank Error", HttpStatus(501), None, None)
 
       failingHttpRoutesJson(error)
         .run(testRequest)
