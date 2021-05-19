@@ -13,6 +13,13 @@ import io.isomarcte.errors4s.core._
   * errors. It should only be used when you need to parse an error, and even
   * then only as a fallback.
   *
+  * @note RFC 7807 allows for the specification of arbitrary fields in
+  *       addition to the standard ones. Unfortunately, there isn't a
+  *       convenient to represent that in [[HttpError]] itself, without making
+  *       assumptions about the serialization format, e.g. JSON, XML,
+  *       etc. Implementations which require these extension fields are
+  *       encouraged to extend [[HttpError]] to add them.
+  *
   * @see [[https://tools.ietf.org/html/rfc7807]]
   */
 trait HttpError extends Error {
@@ -61,11 +68,23 @@ trait HttpError extends Error {
 object HttpError {
 
   /** The trivial implementation of [[HttpError]]. */
-  final case class SimpleHttpError(
+  final private[this] case class HttpErrorImpl(
     override val `type`: NonEmptyString,
     override val title: NonEmptyString,
     override val status: HttpStatus,
     override val detail: Option[String],
     override val instance: Option[NonEmptyString]
-  ) extends HttpError
+  ) extends HttpError {
+    final override lazy val toString: String =
+      s"HttpError(type = ${`type`}, title = ${title}, status = ${status}, detail = ${detail}, instance = ${instance})"
+  }
+
+  /** The trivial [[HttpError]] implementation. */
+  def simple(
+    `type`: NonEmptyString,
+    title: NonEmptyString,
+    status: HttpStatus,
+    detail: Option[String],
+    instance: Option[NonEmptyString]
+  ): HttpError = HttpErrorImpl(`type`, title, status, detail, instance)
 }

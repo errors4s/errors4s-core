@@ -106,7 +106,7 @@ import eu.timepit.refined.types.all._
 import io.isomarcte.errors4s.core._
 
 val e: Error = Error.withMessage(NonEmptyString("Failure During Parsing"))
-// e: Error = SimpleError(
+// e: Error = ErrorImpl(
 //   primaryErrorMessage = Failure During Parsing,
 //   secondaryErrorMessages = Vector(),
 //   causes = Vector()
@@ -155,7 +155,7 @@ def add(a: String, b: String): Either[Throwable, Int] =
 
 add("1", "a")
 // res6: Either[Throwable, Int] = Left(
-//   value = SimpleError(
+//   value = ErrorImpl(
 //     primaryErrorMessage = repl.MdocSession.App5.InvalidIntException,
 //     secondaryErrorMessages = Vector(),
 //     causes = Vector(repl.MdocSession$App5$InvalidIntException)
@@ -194,7 +194,7 @@ def add(a: String, b: String): Either[Throwable, Int] =
 
 add("1", "a")
 // res8: Either[Throwable, Int] = Left(
-//   value = SimpleError(
+//   value = ErrorImpl(
 //     primaryErrorMessage = Error During Addition Operation,
 //     secondaryErrorMessages = Vector(),
 //     causes = Vector(repl.MdocSession$App7$InvalidIntException)
@@ -216,18 +216,16 @@ object OpError {
 }
 ```
 
-Or if your domain is simple enough an out of the box default error `SimpleError` is provided.
+Or if your domain is simple enough an out of the box default error with the various functions on the companion object of `Error`, e.g. `withMessage`.
 
 ```scala
-Error.SimpleError(NonEmptyString("Error during parsing"), Vector.empty, Vector.empty)
-// res9: Error.SimpleError = SimpleError(
+Error.withMessage(NonEmptyString("Error during parsing"))
+// res9: Error = ErrorImpl(
 //   primaryErrorMessage = Error during parsing,
 //   secondaryErrorMessages = Vector(),
 //   causes = Vector()
 // )
 ```
-
-In fact the various `withMessage` functions on the `Error` companion object, e.g. `Error.withMessage` or `Error.withMessageAndCause`, are just wrappers on `Error.SimpleError`.
 
 ## http4s ##
 

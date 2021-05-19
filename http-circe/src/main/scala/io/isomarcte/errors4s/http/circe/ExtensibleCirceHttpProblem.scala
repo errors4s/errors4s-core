@@ -1,41 +1,84 @@
 package io.isomarcte.errors4s.http.circe
 
+import cats.syntax.all._
 import io.circe._
+import io.circe.syntax._
 import io.isomarcte.errors4s.http._
-import io.isomarcte.errors4s.http.circe.implicits._
 
 trait ExtensibleCirceHttpProblem extends HttpProblem {
 
-  /** Convert this [[ExtensibleCirceHttpProblem]] to JSON
+  /** Additional fields beyond those defined in [[HttpProblem]].
     *
-    * @note We can't just use a `Encoder[CirceHttpProblem]` here because the
-    *       actual implementation may have extension members as defined in RFC
-    *       7807. Thus we have to force the concrete implementation to provide
-    *       the real JSON representation.
-    *
-    * @see [[https://tools.ietf.org/html/rfc7807#section-3.2]]
+    * @note This [[io.circe.JsonObject]] should ''not'' contain keys which
+    *       will conflict with the canonical fields in [[HttpProblem]].
     */
-  def toJson: Json
+  def additionalFields: JsonObject = JsonObject.empty
 }
 
 object ExtensibleCirceHttpProblem {
 
+  final private[this] case class ExtensibleCirceHttpProblemImpl(
+    override val `type`: Option[String],
+    override val title: Option[String],
+    override val status: Option[Int],
+    override val detail: Option[String],
+    override val instance: Option[String],
+    override val additionalFields: JsonObject
+  ) extends ExtensibleCirceHttpProblem {
+    final override lazy val toString: String =
+      s"ExtensibleCirceHttpError(type = ${`type`}, title = $title, status = $status, detail = $detail, instance = $instance, additionalFields = ${additionalFields.toString}"
+  }
+
+  def simpleWithAdditionalFields[F[_]](
+    `type`: Option[String],
+    title: Option[String],
+    status: Option[Int],
+    detail: Option[String],
+    instance: Option[String],
+    additionalFields: JsonObject
+  ): ExtensibleCirceHttpProblem =
+    ExtensibleCirceHttpProblemImpl(`type`, title, status, detail, instance, filterRestrictedKeys(additionalFields))
+
+  def simple[F[_]](
+    `type`: Option[String],
+    title: Option[String],
+    status: Option[Int],
+    detail: Option[String],
+    instance: Option[String]
+  ): ExtensibleCirceHttpProblem = simpleWithAdditionalFields(`type`, title, status, detail, instance, JsonObject.empty)
+
   implicit def circeCodec: Codec[ExtensibleCirceHttpProblem] =
     Codec.from[ExtensibleCirceHttpProblem](
       Decoder.instance[ExtensibleCirceHttpProblem]((hcursor: HCursor) =>
-        Decoder[HttpProblem.SimpleHttpProblem]
-          .apply(hcursor)
-          .map(sht =>
-            new ExtensibleCirceHttpProblem {
-              override val `type`: Option[String]   = sht.`type`
-              override val title: Option[String]    = sht.title
-              override val status: Option[Int]      = sht.status
-              override val detail: Option[String]   = sht.detail
-              override val instance: Option[String] = sht.instance
-              override val toJson: Json             = hcursor.value
-            }
-          )
+        (
+          hcursor.downField("type").as[Option[String]],
+          hcursor.downField("title").as[Option[String]],
+          hcursor.downField("status").as[Option[Int]],
+          hcursor.downField("detail").as[Option[String]],
+          hcursor.downField("instance").as[Option[String]],
+          hcursor.value.as[JsonObject]
+        ).mapN { case (typeValue, title, status, detail, instance, additionalFields) =>
+          simpleWithAdditionalFields(typeValue, title, status, detail, instance, additionalFields)
+        }
       ),
-      Encoder.instance[ExtensibleCirceHttpProblem](_.toJson)
+      Encoder.instance(value =>
+        Json.fromJsonObject(
+          JsonObject(
+            "type"     -> value.`type`.asJson,
+            "title"    -> value.title.asJson,
+            "status"   -> value.status.asJson,
+            "detail"   -> value.detail.asJson,
+            "instance" -> value.instance.asJson
+          ).deepMerge(filterRestrictedKeys(value.additionalFields))
+        )
+      )
     )
+
+  def fromHttpProblem(value: HttpProblem): ExtensibleCirceHttpProblem =
+    value match {
+      case value: ExtensibleCirceHttpProblem =>
+        value
+      case value =>
+        simple(value.`type`, value.title, value.status, value.detail, value.instance)
+    }
 }

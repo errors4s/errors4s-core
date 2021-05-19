@@ -16,7 +16,7 @@ function check_for_snapshots() {
 }
 
 function check_build() {
-    sbt ';+clean;+mimaReportBinaryIssues;+versionPolicyCheck;+versionCheck;+test;+doc;+test:doc'
+    sbt ';+clean;+versionSchemeEnforcerCheck;+test;+doc;+test:doc'
     ./check-docs.sh
 }
 

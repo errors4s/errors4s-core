@@ -187,13 +187,11 @@ object OpError {
 }
 ```
 
-Or if your domain is simple enough an out of the box default error `SimpleError` is provided.
+Or if your domain is simple enough an out of the box default error with the various functions on the companion object of `Error`, e.g. `withMessage`.
 
 ```scala mdoc
-Error.SimpleError(NonEmptyString("Error during parsing"), Vector.empty, Vector.empty)
+Error.withMessage(NonEmptyString("Error during parsing"))
 ```
-
-In fact the various `withMessage` functions on the `Error` companion object, e.g. `Error.withMessage` or `Error.withMessageAndCause`, are just wrappers on `Error.SimpleError`.
 
 ## http4s ##
 

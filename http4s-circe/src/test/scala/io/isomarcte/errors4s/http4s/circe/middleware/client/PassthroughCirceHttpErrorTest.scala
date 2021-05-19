@@ -114,7 +114,7 @@ object PassthroughCirceHttpErrorTest {
     override val instance: Option[NonEmptyString],
     customInt: Int
   ) extends ExtensibleCirceHttpError {
-    override lazy val toJson: Json = this.asJson
+    override lazy val additionalFields: JsonObject = JsonObject("customInt" -> customInt.asJson)
   }
 
   private object CustomCirceHttpError {
@@ -137,7 +137,7 @@ object PassthroughCirceHttpErrorTest {
   )
 
   private def constClientF(response: SyncIO[Response[SyncIO]]): Client[SyncIO] =
-    PassthroughCirceHttpError(Sync[SyncIO])(Client[SyncIO](Function.const(Resource.liftF(response))))
+    PassthroughCirceHttpError(Sync[SyncIO])(Client[SyncIO](Function.const(Resource.eval(response))))
 
   private def constClient(response: Response[SyncIO]): Client[SyncIO] = constClientF(SyncIO.pure(response))
 }
