@@ -103,7 +103,7 @@ ThisBuild / githubWorkflowBuildPreamble :=
     WorkflowStep.Sbt(List("doc"))
   )
 ThisBuild / githubWorkflowBuildPostamble :=
-  List(WorkflowStep.Sbt(List("test:doc", "versionSchemeEnforcerCheck", "';project core;++3.0.0;test'")))
+  List(WorkflowStep.Sbt(List("test:doc", "versionSchemeEnforcerCheck", "+core/test")))
 ThisBuild / versionScheme := Some("pvp")
 
 lazy val docSettings: List[Def.Setting[_]] = List(
