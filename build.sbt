@@ -100,7 +100,7 @@ ThisBuild / githubWorkflowBuildPreamble :=
     WorkflowStep.Sbt(List("scalafmtSbtCheck", "scalafmtCheckAll")),
     WorkflowStep.Sbt(List("versionSchemeEnforcerCheck")),
     WorkflowStep.Run(List("sbt 'scalafixAll --check'")),
-    WorkflowStep.Sbt(List("doc", "unidoc"))
+    WorkflowStep.Sbt(List("doc"))
   )
 ThisBuild / githubWorkflowBuildPostamble :=
   List(WorkflowStep.Sbt(List("test:doc", "versionSchemeEnforcerCheck", "';project core;++3.0.0;test'")))
@@ -199,13 +199,11 @@ lazy val errors4s = (project in file("."))
     List(
       name := projectName,
       Compile / packageBin / publishArtifact := false,
-      Compile / packageSrc / publishArtifact := false,
-      Compile / packageDoc / mappings :=
-        (ScalaUnidoc / packageDoc / mappings).value
+      Compile / packageSrc / publishArtifact := false
     )
   )
   .aggregate(core, circe, http, http4s, `http-circe`, `http4s-circe`)
-  .enablePlugins(ScalaUnidocPlugin)
+  .disablePlugins(ScalaUnidocPlugin)
   .disablePlugins(SbtVersionSchemeEnforcerPlugin)
 
 // Core //
@@ -239,8 +237,7 @@ lazy val circe = project
       List("io.isomarcte.errors4s.core._", "io.isomarcte.errors4s.core.syntax.all._")
         .map(value => s"import $value")
         .mkString("\n"),
-    libraryDependencies ++=
-      List(circeG %% circeCoreA % circeV, typelevelG %% catsCoreA % catsV, typelevelG %% catsKernelA % catsV),
+    libraryDependencies ++= List(circeG %% circeCoreA % circeV),
     versionSchemeEnforcerIntialVersion := Some("1.0.0.0")
   )
   .dependsOn(core)
@@ -251,11 +248,19 @@ lazy val http = project
   .settings(commonSettings, publishSettings)
   .settings(
     name := s"${projectName}-http",
-    libraryDependencies ++= List("org.scala-lang" % "scala-reflect" % scalaVersion.value % Provided),
+    libraryDependencies ++= {
+      if (isScala3(scalaBinaryVersion.value)) {
+        Nil
+      } else {
+        List("org.scala-lang" % "scala-reflect" % scalaVersion.value % Provided),
+      }
+    },
+    libraryDependencies ++= List(scalatestG %% scalatestA % scalatestV % Test),
     console / initialCommands :=
       List("io.isomarcte.errors4s.core._", "io.isomarcte.errors4s.core.syntax.all._", "io.isomarcte.errors4s.http._")
         .map(value => s"import $value")
-        .mkString("\n")
+        .mkString("\n"),
+    crossScalaVersions += scala30
   )
   .dependsOn(core)
 

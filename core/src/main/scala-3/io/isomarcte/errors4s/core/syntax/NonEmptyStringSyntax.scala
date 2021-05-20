@@ -9,6 +9,18 @@ private[core] trait NonEmptyStringSyntax{
   import NonEmptyStringSyntax.*
 
   extension (inline sc: StringContext) {
+    /** Create a [[NonEmptyString]] from a `StringContext`. Interpolation of other
+      * values is permitted as long as there is at least one non-empty string
+      * literal component. This is verified at compile time.
+      *
+      * Alternatively, interpolation of literal values which can not produce
+      * empty strings is also permitted (only on Scala >= 3.x.x). For example,
+      *
+      * {{{
+      * scala> nes"""${2 * 100}"""
+      * val res0: io.isomarcte.errors4s.core.NonEmptyString = 200
+      * }}}
+      */
     inline def nes(inline args: Any*): NonEmptyString =
       inline if(isAtLeastOneNonEmptyString(sc, args)) {
         NonEmptyString.from(sc.s(args*)).getOrElse(throw new AssertionError("Error during macro expansion of StringContext `nes`. This is an errors4s-core bug. Please report it."))
