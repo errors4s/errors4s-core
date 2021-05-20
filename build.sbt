@@ -239,11 +239,8 @@ lazy val circe = project
       List("io.isomarcte.errors4s.core._", "io.isomarcte.errors4s.core.syntax.all._")
         .map(value => s"import $value")
         .mkString("\n"),
-    libraryDependencies ++= List(
-      circeG %% circeCoreA % circeV,
-      typelevelG %% catsCoreA % catsV,
-      typelevelG %% catsKernelA % catsV
-    ),
+    libraryDependencies ++=
+      List(circeG %% circeCoreA % circeV, typelevelG %% catsCoreA % catsV, typelevelG %% catsKernelA % catsV),
     versionSchemeEnforcerIntialVersion := Some("1.0.0.0")
   )
   .dependsOn(core)
