@@ -1,7 +1,7 @@
 import ReleaseTransformations._
-import sbt.librarymanagement.VersionNumber
-import _root_.org.errors4s.sbt._
 import _root_.io.isomarcte.sbt.version.scheme.enforcer.core._
+import org.errors4s.sbt._
+import sbt.librarymanagement.VersionNumber
 
 // Constants //
 
