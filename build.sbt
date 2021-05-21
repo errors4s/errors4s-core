@@ -1,15 +1,14 @@
 import ReleaseTransformations._
 import sbt.librarymanagement.VersionNumber
-import _root_.io.isomarcte.errors4s.sbt.ScalaApiDoc
+import _root_.org.errors4s.sbt._
 import _root_.io.isomarcte.sbt.version.scheme.enforcer.core._
-import _root_.io.isomarcte.errors4s.build._
 
 // Constants //
 
-lazy val isomarcteOrg  = "io.isomarcte"
+lazy val org           = "org.errors4s"
 lazy val jreVersion    = "15"
 lazy val projectName   = "errors4s"
-lazy val projectUrl    = url("https://github.com/isomarcte/errors4s")
+lazy val projectUrl    = url("https://github.com/errors4s/errors4s")
 lazy val scala212      = "2.12.13"
 lazy val scala213      = "2.13.5"
 lazy val scala30       = "3.0.0"
@@ -81,16 +80,20 @@ lazy val vaultV           = "2.0.0"
 
 def isScala3(version: String): Boolean = version.startsWith("3")
 
-// Common Settings
+// Common Settings //
 
 ThisBuild / crossScalaVersions := scalaVersions.toSeq
 
-ThisBuild / organization := isomarcteOrg
+ThisBuild / organization := org
 ThisBuild / scalaVersion := scala213
 ThisBuild / scalafixDependencies ++= List(organizeImportsG %% organizeImportsA % organizeImportsV)
 ThisBuild / scalafixScalaBinaryVersion := "2.13"
 ThisBuild / semanticdbEnabled := true
 ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
+
+// Baseline version for repo split
+
+ThisBuild / versionSchemeEnforcerIntialVersion := Some("1.0.0.0")
 
 // GithubWorkflow
 ThisBuild / githubWorkflowPublishTargetBranches := Nil
@@ -108,8 +111,7 @@ ThisBuild / githubWorkflowBuildPostamble :=
 ThisBuild / versionScheme := Some("pvp")
 
 lazy val docSettings: List[Def.Setting[_]] = List(
-  apiURL :=
-    Some(url(s"https://www.javadoc.io/doc/io.isomarcte/errors4s_${scalaBinaryVersion.value}/latest/index.html")),
+  apiURL := Some(url(s"https://www.javadoc.io/doc/org/errors4s_${scalaBinaryVersion.value}/latest/index.html")),
   autoAPIMappings := true,
   Compile / doc / apiMappings ++= {
     val moduleLink: String => (java.io.File, java.net.URL) = module => ScalaApiDoc.jreModuleLink(jreVersion)(module)
@@ -171,7 +173,7 @@ lazy val publishSettings = List(
     else
       Some("releases" at nexus + "service/local/staging/deploy/maven2")
   },
-  scmInfo := Some(ScmInfo(projectUrl, "scm:git:git@github.com:isomarcte/errors4s.git")),
+  scmInfo := Some(ScmInfo(projectUrl, "scm:git:git@github.com:errors4s/errors4s.git")),
   developers :=
     List(Developer("isomarcte", "David Strawn", "isomarcte@gmail.com", url("https://github.com/isomarcte"))),
   credentials += Credentials(Path.userHome / ".sbt" / ".credentials"),
@@ -219,9 +221,7 @@ lazy val core = project
   .settings(
     name := s"${projectName}-core",
     console / initialCommands :=
-      List("io.isomarcte.errors4s.core._", "io.isomarcte.errors4s.core.syntax.all._")
-        .map(value => s"import $value")
-        .mkString("\n"),
+      List("org.errors4s.core._", "org.errors4s.core.syntax.all._").map(value => s"import $value").mkString("\n"),
     crossScalaVersions += scala30,
     libraryDependencies ++= {
       if (scalaBinaryVersion.value.startsWith("3")) {
@@ -240,9 +240,7 @@ lazy val circe = project
   .settings(
     name := s"${projectName}-circe",
     console / initialCommands :=
-      List("io.isomarcte.errors4s.core._", "io.isomarcte.errors4s.core.syntax.all._")
-        .map(value => s"import $value")
-        .mkString("\n"),
+      List("org.errors4s.core._", "org.errors4s.core.syntax.all._").map(value => s"import $value").mkString("\n"),
     libraryDependencies ++= List(circeG %% circeCoreA % circeV),
     versionSchemeEnforcerIntialVersion := Some("1.0.0.0")
   )
@@ -263,7 +261,7 @@ lazy val http = project
     },
     libraryDependencies ++= List(scalatestG %% scalatestA % scalatestV % Test),
     console / initialCommands :=
-      List("io.isomarcte.errors4s.core._", "io.isomarcte.errors4s.core.syntax.all._", "io.isomarcte.errors4s.http._")
+      List("org.errors4s.core._", "org.errors4s.core.syntax.all._", "org.errors4s.http._")
         .map(value => s"import $value")
         .mkString("\n"),
     crossScalaVersions += scala30
@@ -290,10 +288,10 @@ lazy val http4s = project
     console / initialCommands :=
       List(
         "cats.effect._",
-        "io.isomarcte.errors4s.core._",
-        "io.isomarcte.errors4s.core.syntax.all._",
-        "io.isomarcte.errors4s.http4s._",
-        "io.isomarcte.errors4s.http4s.client._",
+        "org.errors4s.core._",
+        "org.errors4s.core.syntax.all._",
+        "org.errors4s.http4s._",
+        "org.errors4s.http4s.client._",
         "org.http4s._",
         "org.http4s.syntax.all._"
       ).map(value => s"import $value").mkString("\n")
@@ -309,12 +307,9 @@ lazy val `http-circe` = project
     libraryDependencies ++=
       List(circeG %% circeCoreA % circeV, typelevelG %% catsCoreA % catsV, typelevelG %% catsKernelA % catsV),
     console / initialCommands :=
-      List(
-        "io.isomarcte.errors4s.core._",
-        "io.isomarcte.errors4s.core.syntax.all._",
-        "io.isomarcte.errors4s.http._",
-        "io.isomarcte.errors4s.http.circe._"
-      ).map(value => s"import $value").mkString("\n")
+      List("org.errors4s.core._", "org.errors4s.core.syntax.all._", "org.errors4s.http._", "org.errors4s.http.circe._")
+        .map(value => s"import $value")
+        .mkString("\n")
   )
   .dependsOn(http, circe)
 
@@ -340,11 +335,11 @@ lazy val `http4s-circe` = project
       ),
     console / initialCommands :=
       List(
-        "io.isomarcte.errors4s.core._",
-        "io.isomarcte.errors4s.core.syntax.all._",
-        "io.isomarcte.errors4s.http._",
-        "io.isomarcte.errors4s.http.circe._",
-        "io.isomarcte.errors4s.http4s.circe._"
+        "org.errors4s.core._",
+        "org.errors4s.core.syntax.all._",
+        "org.errors4s.http._",
+        "org.errors4s.http.circe._",
+        "org.errors4s.http4s.circe._"
       ).map(value => s"import $value").mkString("\n")
   )
   .dependsOn(`http-circe`)

@@ -1,4 +1,4 @@
-package io.isomarcte.errors4s.sbt
+package org.errors4s.sbt
 
 import java.io.File
 import java.net.URL

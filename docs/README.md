@@ -9,7 +9,7 @@ This project has the following goals,
 
 [The unified ScalaDoc may be viewed here][javadoc].
 
-[javadoc]: https://www.javadoc.io/doc/io.isomarcte/errors4s_2.13/latest/index.html "Scaladoc"
+[javadoc]: https://www.javadoc.io/doc/org/errors4s_2.13/latest/index.html "Scaladoc"
 
 # Version Information #
 
@@ -75,7 +75,7 @@ The core module defines a new type `Error`. It extends `RuntimeException` (and t
 
 ```scala mdoc:fail
 import eu.timepit.refined.types.all._
-import io.isomarcte.errors4s.core._
+import org.errors4s.core._
 
 Error.withMessage(null: NonEmptyString)
 ```
@@ -84,7 +84,7 @@ Nor will this code,
 
 ```scala
 import eu.timepit.refined.types.all._
-import io.isomarcte.errors4s.core._
+import org.errors4s.core._
 
 Error.withMessage(NonEmptyString(""))
 ```
@@ -93,7 +93,7 @@ but this code does compile,
 
 ```scala mdoc
 import eu.timepit.refined.types.all._
-import io.isomarcte.errors4s.core._
+import org.errors4s.core._
 
 val e: Error = Error.withMessage(NonEmptyString("Failure During Parsing"))
 ```
@@ -112,7 +112,7 @@ adaptError(e)
 `Error` also provides a built in method to attempt to handle situations where the class name of some arbitrary `Throwable` was intended to communicate why an error occurred. Going back to our original example, we can use `Error.fromThrowable` to get a much more useful error.
 
 ```scala mdoc:reset
-import io.isomarcte.errors4s.core._
+import org.errors4s.core._
 import scala.util.Try
 
 // From some hypothetical parsing library
@@ -144,7 +144,7 @@ You can see that since the `InvalidIntException` didn't have a defined `getMessa
 
 ```scala mdoc:reset
 import eu.timepit.refined.types.all._
-import io.isomarcte.errors4s.core._
+import org.errors4s.core._
 import scala.util.Try
 
 // From some hypothetical parsing library

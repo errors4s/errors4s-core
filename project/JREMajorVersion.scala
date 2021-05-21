@@ -1,4 +1,4 @@
-package io.isomarcte.errors4s.build
+package org.errors4s.sbt
 
 import scala.util._
 
