@@ -1,7 +1,5 @@
 package io.isomarcte.errors4s.core
 
-import eu.timepit.refined.types.all._
-
 /** An error type which is guaranteed to be useful.
   *
   * In the Scala ecosystem, for better or worse, most errors end up getting
@@ -98,7 +96,17 @@ trait Error extends RuntimeException {
   final lazy val errorMessages: Vector[String] =
     Vector(primaryErrorMessage.value) ++ secondaryErrorMessages ++ causesErrorMessages
 
-  final override lazy val getMessage: String = errorMessages.mkString(", ")
+  final lazy val getMessageNes: NonEmptyString = {
+    val nonPrimaryErrorMessages: Vector[String] = (secondaryErrorMessages ++ causesErrorMessages)
+    nonPrimaryErrorMessages.size match {
+      case size if size <= 0 =>
+        primaryErrorMessage
+      case _ =>
+        primaryErrorMessage ++ (", " ++ nonPrimaryErrorMessages.mkString(", "))
+    }
+  }
+
+  final override lazy val getMessage: String = getMessageNes.value
 
   final override lazy val getCause: Throwable = causes.headOption.getOrElse(null)
 }
@@ -170,9 +178,7 @@ object Error {
   def errorMessageFromThrowable(t: Throwable): NonEmptyString =
     t match {
       case t: Error =>
-        NonEmptyString
-          .from(t.errorMessages.mkString(", "))
-          .getOrElse(t.primaryErrorMessage /* should not be possible */ )
+        t.getMessageNes
       case _ =>
         NonEmptyString
           .from(
@@ -180,7 +186,9 @@ object Error {
             Option(t.getLocalizedMessage()).getOrElse(nameOf(t))
           )
           .getOrElse(
-            NonEmptyString(
+            // Normally we'd use the nes interpolator here, but since it is a
+            // macro we can't use it in the same compilation unit.
+            NonEmptyString.unsafe(
               "Unknown Error: getLocalizedMessage was null and we could not get the class name. This is probably a bug in errors4s."
             )
           )

@@ -3,15 +3,15 @@ package io.isomarcte.errors4s.http4s.circe.middleware.client
 import cats.effect._
 import cats.effect.concurrent._
 import cats.implicits._
-import eu.timepit.refined.types.all._
 import fs2.Chunk
 import fs2.Stream
 import io.circe._
-import io.circe.generic.semiauto._
-import io.circe.refined._
 import io.circe.syntax._
+import io.isomarcte.errors4s.circe.instances._
+import io.isomarcte.errors4s.core._
 import io.isomarcte.errors4s.http._
 import io.isomarcte.errors4s.http.circe._
+import io.isomarcte.errors4s.http.circe.implicits.httpStatusCodec
 import io.isomarcte.errors4s.http4s.circe._
 import java.nio.charset.StandardCharsets
 import org.http4s._
@@ -118,7 +118,11 @@ object PassthroughCirceHttpErrorTest {
   }
 
   private object CustomCirceHttpError {
-    implicit lazy val c: Codec[CustomCirceHttpError] = deriveCodec
+    implicit lazy val c: Codec[CustomCirceHttpError] =
+      Codec.forProduct6("type", "title", "status", "detail", "instance", "customInt")(CustomCirceHttpError.apply _)(
+        (value: CustomCirceHttpError) =>
+          (value.`type`, value.title, value.status, value.detail, value.instance, value.customInt)
+      )
   }
 
   private lazy val testError: CustomCirceHttpError = CustomCirceHttpError(

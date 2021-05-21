@@ -1,6 +1,5 @@
 package io.isomarcte.errors4s.http
 
-import eu.timepit.refined.types.all._
 import io.isomarcte.errors4s.core._
 
 /** An error type which represents an HTTP related problem.

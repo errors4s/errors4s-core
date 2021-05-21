@@ -1,10 +1,10 @@
 package io.isomarcte.errors4s.http4s.client
 
 import _root_.io.isomarcte.errors4s.core._
+import _root_.io.isomarcte.errors4s.core.syntax.all._
 import cats._
 import cats.data._
 import cats.implicits._
-import eu.timepit.refined.types.all._
 import io.isomarcte.errors4s.http4s.RedactionConfiguration._
 import io.isomarcte.errors4s.http4s._
 import org.http4s._
@@ -39,18 +39,8 @@ sealed trait ClientResponseError[A] extends Error {
   final lazy val responseHeadersValue: Headers = responseHeaders.value
 
   final override lazy val primaryErrorMessage: NonEmptyString = requestUri
-    .flatMap(
-      _.value
-        .host
-        .flatMap(host =>
-          NonEmptyString.from(s"Unexpected response from HTTP call to ${host.renderString}: ${status}").toOption
-        )
-    )
-    .orElse(NonEmptyString.from(s"Unexpected response from HTTP call: ${status}").toOption)
-    .getOrElse(
-      // Should be impossible
-      NonEmptyString("Unexpected response from HTTP call")
-    )
+    .flatMap(_.value.host.map(host => nes"Unexpected response from HTTP call to ${host.renderString}: ${status}"))
+    .getOrElse(nes"Unexpected response from HTTP call: ${status}")
 
   final override lazy val secondaryErrorMessages: Vector[String] =
     requestUri.map(uri => s"Request URI: ${uri.value.renderString}").toVector ++
@@ -63,12 +53,7 @@ sealed trait ClientResponseError[A] extends Error {
     responseBodyT
       .foldF(
         (t: Throwable) =>
-          Some(
-            Error.withMessageAndCause(
-              NonEmptyString("Error occurred when attempting to decode the error response body."),
-              t
-            )
-          ),
+          Some(Error.withMessageAndCause(nes"Error occurred when attempting to decode the error response body.", t)),
         Function.const(None)
       )
       .toVector
