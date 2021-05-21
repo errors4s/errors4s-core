@@ -2,6 +2,7 @@ import ReleaseTransformations._
 import sbt.librarymanagement.VersionNumber
 import _root_.io.isomarcte.errors4s.sbt.ScalaApiDoc
 import _root_.io.isomarcte.sbt.version.scheme.enforcer.core._
+import _root_.io.isomarcte.errors4s.build._
 
 // Constants //
 
@@ -130,7 +131,12 @@ lazy val commonSettings: List[Def.Setting[_]] =
     scalacOptions := {
       scalacOptions.value ++
         (if (isScala3(scalaBinaryVersion.value)) {
-           List("-release:8", "-source:3.0-migration")
+           List("-source:3.0-migration") ++
+             (if (JREMajorVersion.majorVersion > 8) {
+                List("-release:8")
+              } else {
+                Nil
+              })
          } else {
            List("-target:jvm-1.8", "-Wconf:cat=unused-imports:info")
          })
