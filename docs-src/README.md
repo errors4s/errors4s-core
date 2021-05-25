@@ -4,7 +4,7 @@
 
 [The Scaladoc for errors4s-core may be viewed here][javadoc].
 
-[javadoc]: https://www.javadoc.io/doc/org/errors4s-core_2.13/0.1.2/index.html "Scaladoc"
+[javadoc]: https://www.javadoc.io/doc/org/errors4s-core_@SCALA_VERSION@/@LATEST_RELEASE@/index.html "Scaladoc"
 
 # Overview #
 
@@ -40,19 +40,12 @@ In version <= 0.1.x of this project the `NonEmptyString` type from the excellent
 
 `NonEmptyString` values can not be directly created at runtime. The only method to directly create them is `from` which returns an `Either[String, NonEmptyString]`, which is `Left` if the given `String` is `null` or `""`.
 
-```scala
+```scala mdoc
 import org.errors4s.core._
 
 NonEmptyString.from("")
-// res0: Either[String, NonEmptyString] = Left(
-//   "Unable to create NonEmptyString from empty string value."
-// )
 NonEmptyString.from(null)
-// res1: Either[String, NonEmptyString] = Left(
-//   "Given String value was null. This is not permitted for NonEmptyString values."
-// )
 NonEmptyString.from("A non-empty string")
-// res2: Either[String, NonEmptyString] = Right("A non-empty string")
 ```
 
 This is a somewhat cumbersome way to create `NonEmptyString` values, especially if we are using them for error messages. We don't want to always handle the `Left` branch of this `Either` when we are certain we are providing non-empty values.
@@ -61,31 +54,26 @@ Thankfully, `NonEmptyString` provides two mechanisms to safely create instances 
 
 The first is the `apply` method. This method uses a compile time macro (different ones for Scala 2 and 3) to check that the given `String` is a non-empty literal value. If it is, then it lifts it into a `NonEmptyString` instance, if it isn't then it yields a _compilation error_. For example,
 
-```scala
+```scala mdoc
 NonEmptyString("A non-empty string")
-// res3: NonEmptyString = "A non-empty string"
 ```
 
 This works well for many situations, but sometimes we want to provide some runtime context in our `NonEmptyString`. For that we can use the `nes` interpolator. The `nes` interpolator allows us to interpolate arbitrary values into our `NonEmptyString` as long as _at least some part of it is a non-empty string literal at compile time_. To use this we need to import `syntax.all` (or `syntax.nes`). For example,
 
-```scala
+```scala mdoc
 import org.errors4s.core.syntax.all._
 
 val port: Int = 70000
-// port: Int = 70000
 
 nes"Invalid port number: ${port}"
-// res4: NonEmptyString = "Invalid port number: 70000"
 ```
 
 Once you have a `NonEmptyString` value you can also add arbitrary other `String` values to it, while retaining the `NonEmptyString`. Thus an alternative way to encode the above expression could have been,
 
-```scala
+```scala mdoc
 val base: NonEmptyString = NonEmptyString("Invalid port number: ")
-// base: NonEmptyString = "Invalid port number: "
 
 val value: NonEmptyString = base :+ port.toString
-// value: NonEmptyString = "Invalid port number: 70000"
 ```
 
 ## Error ##
@@ -94,28 +82,16 @@ val value: NonEmptyString = base :+ port.toString
 
 They are all pretty straight forward, effectively allowing convenient access to all the permutations of an `Error` encoding.
 
-```scala
+```scala mdoc
 Error.withMessage(nes"An error has occurred")
-// res5: Error = ErrorImpl("An error has occurred", Vector(), Vector())
 Error.withMessages(nes"An error has occurred", "It was very bad")
-// res6: Error = ErrorImpl(
-//   "An error has occurred",
-//   Vector("It was very bad"),
-//   Vector()
-// )
 Error.withMessagesAndCause(nes"An error has occurred", "It was very bad", Error.withMessage(nes"This was the cause"))
-// res7: Error = ErrorImpl(
-//   "An error has occurred",
-//   Vector("It was very bad"),
-//   Vector(ErrorImpl("This was the cause", Vector(), Vector()))
-// )
 ```
 
 As mentioned above, `getMessage` aggregates the entire error context together. For example,
 
-```scala
+```scala mdoc
 Error.withMessagesAndCause(nes"An error has occurred", "It was very bad", Error.withMessage(nes"This was the cause")).getMessage
-// res8: String = "Primary Error: An error has occurred, Secondary Errors(It was very bad), Causes(Primary Error: This was the cause)"
 ```
 
 [refined]: https://github.com/refined "refined"

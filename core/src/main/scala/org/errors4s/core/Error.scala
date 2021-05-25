@@ -97,12 +97,21 @@ trait Error extends RuntimeException {
     Vector(primaryErrorMessage.value) ++ secondaryErrorMessages ++ causesErrorMessages
 
   final lazy val getMessageNes: NonEmptyString = {
-    val nonPrimaryErrorMessages: Vector[String] = (secondaryErrorMessages ++ causesErrorMessages)
-    nonPrimaryErrorMessages.size match {
+    val formattedPrimaryErrorMessage: NonEmptyString = "Primary Error: " +: primaryErrorMessage
+
+    val withSecondary: NonEmptyString =
+      secondaryErrorMessages.size match {
+        case size if size <= 0 =>
+          formattedPrimaryErrorMessage
+        case _ =>
+          formattedPrimaryErrorMessage :+ (", Secondary Errors(" ++ secondaryErrorMessages.mkString(", ") ++ ")")
+      }
+
+    causesErrorMessages.size match {
       case size if size <= 0 =>
-        primaryErrorMessage
+        withSecondary
       case _ =>
-        primaryErrorMessage ++ (", " ++ nonPrimaryErrorMessages.mkString(", "))
+        withSecondary :+ (", Causes(" ++ causesErrorMessages.mkString(", ") ++ ")")
     }
   }
 

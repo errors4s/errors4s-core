@@ -8,10 +8,16 @@ sealed trait NonEmptyString {
 
   // final //
 
-  /** Concatenate a [[java.lang.String]] value with this [[NonEmptyString]]
-    * value.
+  /** Append a [[java.lang.String]] to a [[NonEmptyString]] value.
     */
-  final def ++(value: String): NonEmptyString = NonEmptyString.concat(this, value)
+  final def :+(value: String): NonEmptyString = NonEmptyString.append(this, value)
+
+  /** Prepend a [[java.lang.String]] to a [[NonEmptyString]] value.
+    */
+  final def +:(value: String): NonEmptyString = NonEmptyString.prepend(value, this)
+
+  /** Concatenate two [[NonEmptyString]] values. */
+  final def ++(value: NonEmptyString): NonEmptyString = NonEmptyString.concat(this, value)
 
   final override def toString: String = s"$value"
 }
@@ -72,11 +78,14 @@ object NonEmptyString {
   def unsafe(value: String): NonEmptyString =
     from(value).fold(error => throw new IllegalArgumentException(error), identity)
 
-  /** Concatenate a [[NonEmptyString]] and a [[java.lang.String]] value. */
-  def concat(head: NonEmptyString, tail: String): NonEmptyString = NonEmptyStringImpl(head.value ++ tail)
+  /** Append a [[java.lang.String]] to a [[NonEmptyString]] value. */
+  def append(head: NonEmptyString, tail: String): NonEmptyString = NonEmptyStringImpl(head.value ++ tail)
+
+  /** Prepend a [[java.lang.String]] to a [[NonEmptyString]] value. */
+  def prepend(head: String, tail: NonEmptyString): NonEmptyString = NonEmptyStringImpl(head ++ tail.value)
 
   /** Concatenate two [[NonEmptyString]] values. */
-  def concatNes(head: NonEmptyString, tail: NonEmptyString): NonEmptyString = concat(head, tail.value)
+  def concat(head: NonEmptyString, tail: NonEmptyString): NonEmptyString = append(head, tail.value)
 
   /** Macro to generate a [[NonEmptyString]] value from a compile time literal
     * [[java.lang.String]] value which is non-empty.

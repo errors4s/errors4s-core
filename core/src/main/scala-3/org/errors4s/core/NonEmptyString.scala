@@ -33,10 +33,25 @@ object NonEmptyString {
 
   extension (inline nes: NonEmptyString) {
     inline def value: String = opaques.value(nes)
+
+    /** Append a [[java.lang.String]] to a [[NonEmptyString]] value.
+      */
+    inline def :+(inline value: String): NonEmptyString =
+      append(nes, value)
+
     /** Concatenate a [[java.lang.String]] value with this [[NonEmptyString]]
       * value.
       */
-    inline def ++(inline that: String): NonEmptyString = concat(nes, that)
+    inline def ++(inline that: NonEmptyString): NonEmptyString =
+      concat(nes, that)
+  }
+
+  extension (inline string: String) {
+
+    /** Prepend a [[java.lang.String]] to a [[NonEmptyString]] value.
+      */
+    inline def +:(inline nes: NonEmptyString): NonEmptyString =
+      prepend(string, nes)
   }
 
   /** Create a [[NonEmptyString]] value from a compile time literal
@@ -55,7 +70,7 @@ object NonEmptyString {
     * scala> import org.errors4s.core.syntax.all._
     * import org.errors4s.core.syntax.all._
     *
-    * scala> nes"""A non empty string ${Some("with interpolation")}"""
+    * scala> nes"""A non empty string \${Some("with interpolation")}"""
     *
     * val res0: org.errors4s.core.NonEmptyString = A non empty string Some(with interpolation)
     *
@@ -73,19 +88,27 @@ object NonEmptyString {
     * value. This will fail if the value is empty.
     */
   inline def from(inline value: String): Either[String, NonEmptyString] =
-    if (value.size > 0) {
+    if (value == null) {
+      Left("Given String value was null. This is not permitted for NonEmptyString values.")
+    } else if (value.size > 0) {
       Right(unsafe(value))
     } else {
       Left("Unable to create NonEmptyString from empty string value.")
     }
 
-  /** Concatenate a [[NonEmptyString]] and a [[java.lang.String]] value. */
-  inline def concat(inline nes: NonEmptyString, inline that: String): NonEmptyString =
-    unsafe(nes.value ++ that)
+  /** Append a [[java.lang.String]] to a [[NonEmptyString]] value.
+    */
+  inline def append(inline head: NonEmptyString, inline tail: String): NonEmptyString =
+    unsafe(head.value ++ tail)
+
+  /** Prepend a [[java.lang.String]] to a [[NonEmptyString]] value.
+    */
+  inline def prepend(inline head: String, inline tail: NonEmptyString): NonEmptyString =
+    unsafe(head ++ tail.value)
 
   /** Concatenate two [[NonEmptyString]] values. */
-  inline def concatNes(inline value: NonEmptyString, inline that: NonEmptyString) =
-    concat(value, that.value)
+  inline def concat(inline head: NonEmptyString, inline tail: NonEmptyString) =
+    append(head, tail.value)
 
   private inline def isEmpty(inline value: String): Boolean =
     ${ isEmptyImpl('value) }
