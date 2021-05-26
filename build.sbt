@@ -48,7 +48,7 @@ ThisBuild / versionScheme := Some("pvp")
 // GithubWorkflow
 ThisBuild / githubWorkflowPublishTargetBranches := Nil
 ThisBuild / githubWorkflowOSes := Set("macos-latest", "ubuntu-latest").toList
-ThisBuild / githubWorkflowJavaVersions := Set("adopt@1.15", "adopt@1.11", "adopt@1.8").toList
+ThisBuild / githubWorkflowJavaVersions := Set("adopt@1.16", "adopt@1.11", "adopt@1.8").toList
 ThisBuild / githubWorkflowBuild := List(WorkflowStep.Sbt(List("versionSchemeEnforcerCheck", "Test / doc")))
 
 // Doc Settings

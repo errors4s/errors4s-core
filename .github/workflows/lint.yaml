@@ -20,7 +20,7 @@ jobs:
       matrix:
         os: [macos-latest, ubuntu-latest]
         scala: [2.13.6]
-        java: [adopt@1.15]
+        java: [adopt@1.16]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout current branch (full)
