@@ -1,4 +1,6 @@
-name: README CHECK
+# See what JREs jabba has for us.
+
+name: Jabba Info
 
 on:
   pull_request:
@@ -6,14 +8,16 @@ on:
   push:
     branches: ['*']
 
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 jobs:
   build:
-    name: README Check
+    name: Jabba Info
     strategy:
       matrix:
-        os: [ubuntu-latest]
-        scala: [2.13.4]
-        java: [adopt@1.15]
+        os: [macos-latest, ubuntu-latest]
+        java: [adopt@1.16]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout current branch (full)
@@ -26,5 +30,4 @@ jobs:
         with:
           java-version: ${{ matrix.java }}
 
-      - shell: bash
-        run: ./check-docs.sh || true
+      - run: jabba ls-remote

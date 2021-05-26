@@ -8,10 +8,16 @@ sealed trait NonEmptyString {
 
   // final //
 
-  /** Concatenate a [[java.lang.String]] value with this [[NonEmptyString]]
-    * value.
+  /** Append a [[java.lang.String]] to a [[NonEmptyString]] value.
     */
-  final def ++(value: String): NonEmptyString = NonEmptyString.concat(this, value)
+  final def :+(value: String): NonEmptyString = NonEmptyString.append(this, value)
+
+  /** Prepend a [[java.lang.String]] to a [[NonEmptyString]] value.
+    */
+  final def +:(value: String): NonEmptyString = NonEmptyString.prepend(value, this)
+
+  /** Concatenate two [[NonEmptyString]] values. */
+  final def ++(value: NonEmptyString): NonEmptyString = NonEmptyString.concat(this, value)
 
   final override def toString: String = s"$value"
 }
@@ -20,17 +26,14 @@ object NonEmptyString {
 
   final private[this] case class NonEmptyStringImpl(override val value: String) extends NonEmptyString
 
-  /** Create a [[NonEmptyString]] value from a compile time literal
-    * [[java.lang.String]] value which is non-empty. This will fail to compile
-    * if the value is not a literal or is an empty literal, e.g. `""`.
+  /** Create a [[NonEmptyString]] value from a compile time literal [[java.lang.String]] value which is non-empty. This
+    * will fail to compile if the value is not a literal or is an empty literal, e.g. `""`.
     *
-    * @note This method only supports a compile time literal
-    *       [[java.lang.String]]. You can't interpolate into it. A more
-    *       powerful mechanism for creating a compile time [[NonEmptyString]]
-    *       value is the `nes` interpolator which can create a value and
-    *       interpolate arbitrary values into it as well, as long as at least
-    *       on component of the StringContext is a compile time non-empty
-    *       String literal.
+    * @note
+    *   This method only supports a compile time literal [[java.lang.String]]. You can't interpolate into it. A more
+    *   powerful mechanism for creating a compile time [[NonEmptyString]] value is the `nes` interpolator which can
+    *   create a value and interpolate arbitrary values into it as well, as long as at least on component of the
+    *   StringContext is a compile time non-empty String literal.
     *
     * {{{
     * scala> import org.errors4s.core.syntax.all._
@@ -45,8 +48,7 @@ object NonEmptyString {
     */
   def apply(value: String): NonEmptyString = macro make
 
-  /** Attempt to create a [[NonEmptyString]] from a [[java.lang.String]]
-    * value. This will fail if the value is empty.
+  /** Attempt to create a [[NonEmptyString]] from a [[java.lang.String]] value. This will fail if the value is empty.
     */
   def from(value: String): Either[String, NonEmptyString] =
     Option(value).fold(
@@ -63,23 +65,26 @@ object NonEmptyString {
       }
     )
 
-  /** Create a [[NonEmptyString]] value from an arbitrary [[java.lang.String]]
-    * value. This will throw an exception if the value is empty.
+  /** Create a [[NonEmptyString]] value from an arbitrary [[java.lang.String]] value. This will throw an exception if
+    * the value is empty.
     *
-    * @note Use of this method for anything other than test code or the REPL
-    *       is ''strongly'' discouraged.
+    * @note
+    *   Use of this method for anything other than test code or the REPL is ''strongly'' discouraged.
     */
   def unsafe(value: String): NonEmptyString =
     from(value).fold(error => throw new IllegalArgumentException(error), identity)
 
-  /** Concatenate a [[NonEmptyString]] and a [[java.lang.String]] value. */
-  def concat(head: NonEmptyString, tail: String): NonEmptyString = NonEmptyStringImpl(head.value ++ tail)
+  /** Append a [[java.lang.String]] to a [[NonEmptyString]] value. */
+  def append(head: NonEmptyString, tail: String): NonEmptyString = NonEmptyStringImpl(head.value ++ tail)
+
+  /** Prepend a [[java.lang.String]] to a [[NonEmptyString]] value. */
+  def prepend(head: String, tail: NonEmptyString): NonEmptyString = NonEmptyStringImpl(head ++ tail.value)
 
   /** Concatenate two [[NonEmptyString]] values. */
-  def concatNes(head: NonEmptyString, tail: NonEmptyString): NonEmptyString = concat(head, tail.value)
+  def concat(head: NonEmptyString, tail: NonEmptyString): NonEmptyString = append(head, tail.value)
 
-  /** Macro to generate a [[NonEmptyString]] value from a compile time literal
-    * [[java.lang.String]] value which is non-empty.
+  /** Macro to generate a [[NonEmptyString]] value from a compile time literal [[java.lang.String]] value which is
+    * non-empty.
     */
   def make(c: Context)(value: c.Expr[String]): c.Expr[NonEmptyString] = {
     import c.universe._

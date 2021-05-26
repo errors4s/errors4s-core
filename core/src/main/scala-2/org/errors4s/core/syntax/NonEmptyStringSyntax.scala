@@ -7,9 +7,8 @@ private[core] trait NonEmptyStringSyntax {
 
   implicit final class NonEmptyStringContext(private val sc: StringContext) {
 
-    /** Create a [[NonEmptyString]] from a `StringContext`. Interpolation of other
-      * values is permitted as long as there is at least one non-empty string
-      * literal component. This is verified at compile time.
+    /** Create a [[NonEmptyString]] from a `StringContext`. Interpolation of other values is permitted as long as there
+      * is at least one non-empty string literal component. This is verified at compile time.
       */
     def nes(args: Any*): NonEmptyString = macro NonEmptyStringSyntax.stringContextMacro
   }

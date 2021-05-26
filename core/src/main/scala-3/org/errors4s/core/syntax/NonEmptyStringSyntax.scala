@@ -17,7 +17,7 @@ private[core] trait NonEmptyStringSyntax{
       * empty strings is also permitted (only on Scala >= 3.x.x). For example,
       *
       * {{{
-      * scala> nes"""${2 * 100}"""
+      * scala> nes"""\${2 * 100}"""
       * val res0: org.errors4s.core.NonEmptyString = 200
       * }}}
       */

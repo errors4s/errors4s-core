@@ -1,13 +1,14 @@
 package org.errors4s.core
 
+import munit._
 import org.errors4s.core.syntax.all._
 
-final class NonEmptyStringTest extends BaseTest {
+final class NonEmptyStringTest extends FunSuite {
 
-  "The nes interpolator" should "yield values for non-empty strings" in {
-    nes" " shouldBe NonEmptyString.unsafe(" ")
-    nes"a ${1 + 2}" shouldBe NonEmptyString.unsafe("a 3")
-    nes"${1 + 2} a" shouldBe NonEmptyString.unsafe("3 a")
-    nes"${1 + 2} a ${2 - 1}" shouldBe NonEmptyString.unsafe("3 a 1")
+  test("nes interpolator") {
+    assertEquals(nes" ", NonEmptyString.unsafe(" "))
+    assertEquals(nes"a ${1 + 2}", NonEmptyString.unsafe("a 3"))
+    assertEquals(nes"${1 + 2} a", NonEmptyString.unsafe("3 a"))
+    assertEquals(nes"${1 + 2} a ${2 - 1}", NonEmptyString.unsafe("3 a 1"))
   }
 }
