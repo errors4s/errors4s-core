@@ -1,0 +1,33 @@
+# See what JREs jabba has for us.
+
+name: Jabba Info
+
+on:
+  pull_request:
+    branches: ['*']
+  push:
+    branches: ['*']
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  build:
+    name: Jabba Info
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+        java: [adopt@1.15]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout current branch (full)
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Setup Java and Scala
+        uses: olafurpg/setup-scala@v10
+        with:
+          java-version: ${{ matrix.java }}
+
+      - run: jabba ls-remote

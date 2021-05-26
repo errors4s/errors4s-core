@@ -43,21 +43,15 @@ ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
 // Baseline version for repo split
 
 ThisBuild / versionSchemeEnforcerIntialVersion := Some("1.0.0.0")
+ThisBuild / versionScheme := Some("pvp")
 
 // GithubWorkflow
 ThisBuild / githubWorkflowPublishTargetBranches := Nil
 ThisBuild / githubWorkflowOSes := Set("macos-latest", "ubuntu-latest").toList
 ThisBuild / githubWorkflowJavaVersions := Set("adopt@1.15", "adopt@1.11", "adopt@1.8").toList
-ThisBuild / githubWorkflowBuildPreamble :=
-  List(
-    WorkflowStep.Sbt(List("scalafmtSbtCheck", "scalafmtCheckAll")),
-    WorkflowStep.Sbt(List("versionSchemeEnforcerCheck")),
-    WorkflowStep.Run(List("sbt 'scalafixAll --check'")),
-    WorkflowStep.Sbt(List("doc"))
-  )
-ThisBuild / githubWorkflowBuildPostamble :=
-  List(WorkflowStep.Sbt(List("test:doc", "versionSchemeEnforcerCheck", "+core/test")))
-ThisBuild / versionScheme := Some("pvp")
+ThisBuild / githubWorkflowBuild := List(WorkflowStep.Sbt(List("versionSchemeEnforcerCheck", "Test / doc")))
+
+// Doc Settings
 
 lazy val docSettings: List[Def.Setting[_]] = List(
   apiURL := Some(url(s"https://www.javadoc.io/doc/org/errors4s_${scalaBinaryVersion.value}/latest/index.html")),
