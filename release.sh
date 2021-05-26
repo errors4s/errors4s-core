@@ -47,14 +47,17 @@ fi
 readonly FAKE_HOME
 export HOME="${FAKE_HOME}"
 
+# JVM Options #
+export JAVA_TOOL_OPTIONS="${JAVA_TOOL_OPTIONS} -Duser.home=${FAKE_HOME}"
+
 # Release #
 
 if git update-index --refresh && git diff-index --quiet @ -- || [ "$DRY_RUN" -ne 0 ]
 then
     # Publish locally first for the scripted tests.
-    sbt --ivy "${FAKE_HOME}/.ivy2" --sbt-dir "${FAKE_HOME}/.sbt" --sbt-boot "${FAKE_HOME}/.sbt/boot" '+clean'
-    sbt --ivy "${FAKE_HOME}/.ivy2" --sbt-dir "${FAKE_HOME}/.sbt" --sbt-boot "${FAKE_HOME}/.sbt/boot" '+publishLocal'
-    sbt --ivy "${FAKE_HOME}/.ivy2" --sbt-dir "${FAKE_HOME}/.sbt" --sbt-boot "${FAKE_HOME}/.sbt/boot" +';scalafixAll --check;scalafmtSbtCheck;scalafmtCheckAll;test;test:doc;'
+    sbt '+clean'
+    sbt '+publishLocal'
+    sbt +';scalafixAll --check;scalafmtSbtCheck;scalafmtCheckAll;test;test:doc;'
 
     # Exit here on DRY_RUN
     if [ "$DRY_RUN" -ne 0 ]
