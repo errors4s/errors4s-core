@@ -1,4 +1,4 @@
-# Errors For Scala #
+# Errors For Scala (Core) #
 
 # ScalaDoc #
 
