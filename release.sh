@@ -1,94 +1,81 @@
 #!/usr/bin/env bash
 
-set -e
+set -ex
 
-declare RELEASE_VERSION
-declare NEXT_VERSION
+PUBLISH='NO'
+declare FAKE_HOME
+declare DRY_RUN
+# Set Default Environment Variables #
 
-function check_for_snapshots() {
-    if sbt 'show libraryDependencies' |& grep -q -i 'snapshot'
+# DRY_RUN
+if [ -z "$DRY_RUN" ]
+then
+    DRY_RUN=0
+fi
+
+readonly DRY_RUN
+
+# FAKE_HOME
+if [ -z "$FAKE_HOME" ]
+then
+    FAKE_HOME="$(mktemp -d)"
+    # Register cleanup trap on exit
+    trap 'rm -rf ${FAKE_HOME}' EXIT
+
+    # Copy local caches into fake home to speed things up.
+    declare -a CACHE_DIRS=('.sbt' '.ivy2/cache' '.coursier/cache/v1' '.cache/coursier/v1')
+
+    for d in ${CACHE_DIRS[*]}
+    do
+        TARGET_PATH="${FAKE_HOME}/${d}"
+        ORIGIN_PATH="${HOME}/${d}"
+
+        if [ -d "$ORIGIN_PATH" ]
+        then
+            mkdir -vp "$TARGET_PATH"
+            cp -bRv "${ORIGIN_PATH}/"* "$TARGET_PATH"
+        else
+            continue
+        fi
+    done
+elif [ ! -d "$FAKE_HOME" ]
+then
+    echo "$FAKE_HOME is not a directory, but the FAKE_HOME value must be a directory." 1>&2
+    exit 2
+fi
+
+readonly FAKE_HOME
+export HOME="${FAKE_HOME}"
+
+# Release #
+
+if git update-index --refresh && git diff-index --quiet @ -- || [ "$DRY_RUN" -ne 0 ]
+then
+    # Publish locally first for the scripted tests.
+    sbt --ivy "${FAKE_HOME}/.ivy2" --sbt-dir "${FAKE_HOME}/.sbt" --sbt-boot "${FAKE_HOME}/.sbt/boot" '+clean'
+    sbt --ivy "${FAKE_HOME}/.ivy2" --sbt-dir "${FAKE_HOME}/.sbt" --sbt-boot "${FAKE_HOME}/.sbt/boot" '+publishLocal'
+    sbt --ivy "${FAKE_HOME}/.ivy2" --sbt-dir "${FAKE_HOME}/.sbt" --sbt-boot "${FAKE_HOME}/.sbt/boot" +';scalafixAll --check;scalafmtSbtCheck;scalafmtCheckAll;test;test:doc;'
+
+    # Exit here on DRY_RUN
+    if [ "$DRY_RUN" -ne 0 ]
     then
-        echo 'Refusing to release with snapshot dependencies.'
-        return 1
-    else
-        return 0
+        exit 0
     fi
-}
 
-function check_build() {
-    sbt ';+clean;+versionSchemeEnforcerCheck;+test;+doc;+test:doc'
-    ./check-docs.sh
-}
-
-function set_release_version() {
-    if [ -n "$RELEASE_VERSION" ]
+    read -r -p 'Continue with publish? Type (YES): ' PUBLISH
+    if [ "${PUBLISH:?}" = 'YES' ]
     then
-        echo "version in ThisBuild := \"${RELEASE_VERSION}\"\n" > version.sbt
-        check_build
+        sbt '+publishSigned'
     else
-        echo 'RELEASE_VERSION is not set.'
-        return 1
+        echo "${PUBLISH} is not YES. Aborting." 1>&2
     fi
-}
-
-function set_next_version() {
-    if [ -n "$NEXT_VERSION" ]
+else
+    if [ "$DRY_RUN" -eq 0 ]
     then
-        echo "version in ThisBuild := \"${NEXT_VERSION}\"\n" > version.sbt
-        check_build
+        echo 'Uncommited local changes. Aborting' 1>&2
+        exit 1
     else
-        echo 'NEXT_VERSION is not set.'
-        return 1
+        echo 'Dry run complete'
+        exit 0
     fi
-}
-
-function commit_release {
-    set_release_version
-    git add version.sbt
-    git commit -m "Release $RELEASE_VERSION"
-    git tag -s "$RELEASE_VERSION" HEAD
-}
-
-function commit_next {
-    set_next_version
-    git add version.sbt
-    git commit -m "Release $NEXT_VERSION"
-}
-
-function set_version() {
-    local RESPONSE=''
-    RELEASE_VERSION="$(sed 's/\-SNAPSHOT//' version.sbt | grep -o '\"[^\"]\+\"' | tr -d '"')"
-    printf "Version will be: %s\n" "$RELEASE_VERSION"
-    read -rp 'Is this version okay (type "YES"): ' RESPONSE
-    if [ "$RESPONSE" = "YES" ]
-    then
-        # Validate current and next versions
-        set_release_version
-        read -rp "Next version: " NEXT_VERSION
-        set_next_version
-
-        # Reset release version and make commits
-        commit_release
-        commit_next
-        git checkout "$RELEASE_VERSION"
-        git push
-        git push origin "$RELEASE_VERSION"
-    else
-        echo "\"$RESPONSE\" is not \"YES\". Aborting."
-        return 1
-    fi
-}
-
-function main() {
-    if [ "$(git --no-pager status -s | wc -l)" = "0" ]
-    then
-        check_for_snapshots
-        set_version
-    else
-        echo 'Uncommitted local changes.'
-        git --no-pager status
-        return 1
-    fi
-}
-
-main "$@"
+fi

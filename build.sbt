@@ -1,4 +1,3 @@
-import ReleaseTransformations._
 import _root_.io.isomarcte.sbt.version.scheme.enforcer.core._
 import _root_.org.errors4s.sbt.GAVs._
 import _root_.org.errors4s.sbt._
@@ -42,7 +41,7 @@ ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
 
 // Baseline version for repo split
 
-ThisBuild / versionSchemeEnforcerIntialVersion := Some("1.0.0.0")
+ThisBuild / versionSchemeEnforcerInitialVersion := Some("1.0.0.0")
 ThisBuild / versionScheme := Some("pvp")
 
 // GithubWorkflow
