@@ -179,7 +179,7 @@ lazy val docs = (project.in(file("errors4s-core-docs")))
         "SCALA_VERSION"  -> "2.13"
       ),
     mdocIn := file("docs-src"),
-    mdocOut := file("docs"),
+    mdocOut := file("docs")
   )
   .dependsOn(core)
   .enablePlugins(MdocPlugin)
