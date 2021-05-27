@@ -30,4 +30,4 @@ jobs:
         with:
           java-version: ${{ matrix.java }}
 
-      - run: sbt ';++3.0.0;docs/mdoc --check
+      - run: sbt ';++3.0.0;docs/mdoc --check'
