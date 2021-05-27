@@ -170,6 +170,7 @@ lazy val core = project
 // Docs //
 
 lazy val docs = (project.in(file("errors4s-core-docs")))
+  .settings(commonSettings)
   .settings(
     name := s"${projectName}-docs",
     mdocVariables :=
