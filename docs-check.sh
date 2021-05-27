@@ -4,7 +4,7 @@ set -e
 
 if git update-index --refresh && git diff-index --quiet @ --
 then
-    sbt '+compile'
+    sbt '+publishLocal'
     sbt ';docs/clean;docs/mdoc'
     if git update-index --refresh && git diff-index --quiet @ --
     then
