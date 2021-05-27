@@ -12,6 +12,7 @@ then
         exit 0
     else
         echo 'Generated documents under VCS control are not up to date.' 1>&2
+        git status 1>&2
         exit 2
     fi
 else
