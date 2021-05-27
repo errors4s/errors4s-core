@@ -33,7 +33,7 @@ then
         if [ -d "$ORIGIN_PATH" ]
         then
             mkdir -vp "$TARGET_PATH"
-            cp -bRv "${ORIGIN_PATH}/"* "$TARGET_PATH"
+            cp -Rv "${ORIGIN_PATH}/"* "$TARGET_PATH"
         else
             continue
         fi
