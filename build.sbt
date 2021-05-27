@@ -33,7 +33,7 @@ def initialImports(packages: List[String], isScala3: Boolean): String = {
 ThisBuild / crossScalaVersions := scalaVersions.toSeq
 
 ThisBuild / organization := org
-ThisBuild / scalaVersion := scala213
+ThisBuild / scalaVersion := scala30
 ThisBuild / scalafixDependencies ++= List(G.organizeImportsG %% A.organizeImportsA % V.organizeImportsV)
 ThisBuild / scalafixScalaBinaryVersion := "2.13"
 ThisBuild / semanticdbEnabled := true
