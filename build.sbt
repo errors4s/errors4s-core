@@ -7,7 +7,7 @@ import _root_.org.errors4s.sbt._
 
 lazy val org           = "org.errors4s"
 lazy val jreVersion    = "16"
-lazy val projectName   = "errors4s"
+lazy val projectName   = "errors4s-core"
 lazy val projectUrl    = url("https://github.com/errors4s/errors4s")
 lazy val scala212      = "2.12.13"
 lazy val scala213      = "2.13.6"
@@ -42,7 +42,7 @@ ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
 
 // Baseline version for repo split
 
-ThisBuild / versionSchemeEnforcerIntialVersion := Some("1.0.0.0")
+ThisBuild / versionSchemeEnforcerInitialVersion := Some("1.0.0.0")
 ThisBuild / versionScheme := Some("pvp")
 
 // GithubWorkflow
@@ -142,7 +142,7 @@ lazy val errors4s = (project in file("."))
   .settings(commonSettings, publishSettings)
   .settings(
     List(
-      name := projectName,
+      name := s"${projectName}-root",
       Compile / packageBin / publishArtifact := false,
       Compile / packageSrc / publishArtifact := false
     )
@@ -155,7 +155,7 @@ lazy val errors4s = (project in file("."))
 lazy val core = project
   .settings(commonSettings, publishSettings)
   .settings(
-    name := s"${projectName}-core",
+    name := s"${projectName}",
     console / initialCommands :=
       initialImports(List("org.errors4s.core", "org.errors4s.core.syntax.all"), isScala3(scalaBinaryVersion.value)),
     libraryDependencies ++= {
@@ -172,13 +172,14 @@ lazy val core = project
 
 lazy val docs = (project.in(file("errors4s-core-docs")))
   .settings(
+    name := s"${projectName}-docs",
     mdocVariables :=
       Map(
         "LATEST_RELEASE" -> versionSchemeEnforcerPreviousVersion.value.getOrElse("latest"),
         "SCALA_VERSION"  -> "2.13"
       ),
     mdocIn := file("docs-src"),
-    mdocOut := file("docs")
+    mdocOut := file("docs"),
   )
   .dependsOn(core)
   .enablePlugins(MdocPlugin)
