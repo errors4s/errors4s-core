@@ -42,7 +42,7 @@ ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
 
 // Baseline version for repo split
 
-ThisBuild / versionSchemeEnforcerIntialVersion := Some("1.0.0.0")
+ThisBuild / versionSchemeEnforcerInitialVersion := Some("1.0.0.0")
 ThisBuild / versionScheme := Some("pvp")
 
 // GithubWorkflow
