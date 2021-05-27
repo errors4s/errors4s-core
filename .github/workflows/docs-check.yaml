@@ -1,0 +1,33 @@
+# Check that the generated documentation is up to date
+
+name: Generated Documentation Check
+
+on:
+  pull_request:
+    branches: ['*']
+  push:
+    branches: ['*']
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  docs-check:
+    name: Generated Documentation Check
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        java: [adopt@1.16]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout current branch (full)
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Setup Java and Scala
+        uses: olafurpg/setup-scala@v10
+        with:
+          java-version: ${{ matrix.java }}
+
+      - run: sbt ';++3.0.0;docs/mdoc --check'

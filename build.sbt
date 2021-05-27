@@ -33,7 +33,7 @@ def initialImports(packages: List[String], isScala3: Boolean): String = {
 ThisBuild / crossScalaVersions := scalaVersions.toSeq
 
 ThisBuild / organization := org
-ThisBuild / scalaVersion := scala213
+ThisBuild / scalaVersion := scala30
 ThisBuild / scalafixDependencies ++= List(G.organizeImportsG %% A.organizeImportsA % V.organizeImportsV)
 ThisBuild / scalafixScalaBinaryVersion := "2.13"
 ThisBuild / semanticdbEnabled := true
@@ -170,6 +170,7 @@ lazy val core = project
 // Docs //
 
 lazy val docs = (project.in(file("errors4s-core-docs")))
+  .settings(commonSettings)
   .settings(
     name := s"${projectName}-docs",
     mdocVariables :=
@@ -178,7 +179,7 @@ lazy val docs = (project.in(file("errors4s-core-docs")))
         "SCALA_VERSION"  -> "2.13"
       ),
     mdocIn := file("docs-src"),
-    mdocOut := file("docs"),
+    mdocOut := file("docs")
   )
   .dependsOn(core)
   .enablePlugins(MdocPlugin)
