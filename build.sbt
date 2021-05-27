@@ -142,7 +142,7 @@ lazy val errors4s = (project in file("."))
   .settings(commonSettings, publishSettings)
   .settings(
     List(
-      name := "${projectName}-root",
+      name := s"${projectName}-root",
       Compile / packageBin / publishArtifact := false,
       Compile / packageSrc / publishArtifact := false
     )
