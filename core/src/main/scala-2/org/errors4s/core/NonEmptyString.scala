@@ -19,7 +19,7 @@ sealed trait NonEmptyString {
   /** Concatenate two [[NonEmptyString]] values. */
   final def ++(value: NonEmptyString): NonEmptyString = NonEmptyString.concat(this, value)
 
-  final override def toString: String = s"$value"
+  final override def toString: String = value
 }
 
 object NonEmptyString {
