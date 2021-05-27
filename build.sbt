@@ -1,4 +1,3 @@
-import ReleaseTransformations._
 import _root_.io.isomarcte.sbt.version.scheme.enforcer.core._
 import _root_.org.errors4s.sbt.GAVs._
 import _root_.org.errors4s.sbt._

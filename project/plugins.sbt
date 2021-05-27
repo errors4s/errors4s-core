@@ -2,7 +2,6 @@ addSbtPlugin("ch.epfl.scala"             % "sbt-scalafix"                       
 addSbtPlugin("com.codecommit"            % "sbt-github-actions"                 % "0.11.0")
 addSbtPlugin("com.eed3si9n"              % "sbt-unidoc"                         % "0.4.3")
 addSbtPlugin("com.github.cb372"          % "sbt-explicit-dependencies"          % "0.2.16")
-addSbtPlugin("com.github.gseitz"         % "sbt-release"                        % "1.0.13")
 addSbtPlugin("com.jsuereth"              % "sbt-pgp"                            % "2.1.1")
 addSbtPlugin("com.timushev.sbt"          % "sbt-updates"                        % "0.5.3")
 addSbtPlugin("io.github.davidgregory084" % "sbt-tpolecat"                       % "0.1.17")
