@@ -1,3 +1,3 @@
-[submodule "sbt-release-script"]
-	path = sbt-release-script
+[submodule "sbt-shell-release"]
+	path = sbt-shell-release
 	url = https://github.com/isomarcte/sbt-shell-release.git
