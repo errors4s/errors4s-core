@@ -94,4 +94,32 @@ As mentioned above, `getMessage` aggregates the entire error context together. F
 Error.withMessagesAndCause(nes"An error has occurred", "It was very bad", Error.withMessage(nes"This was the cause")).getMessage
 ```
 
+# Versioning #
+
+## PVP ##
+
+This project follows [Package Versioning Policy (PVP)][pvp] for versioning. This is similar to [Semantic Versioning (semver)][semver] with a couple small differences. The most important differences are that the first _two_ version numbers both correspond to the major version, and thus both indicate potentially binary breaking changes, rather than just the first number as in [semver][semver]. The other important difference is that there are some other circumstances which imply a major version change beyond just binary compatibility, the most common such circumstance in Scala being the deprecation of a symbol (method/function/type/class/trait/etc.).
+
+For a more detailed overview see [this writeup][sbt-version-scheme-enforcer-pvp], as well as the official documentation for [pvp][pvp].
+
+## Why? ##
+
+By convention in this project (and the other errors4s projects) the _first_ version number indicates a binary compatible dependency set and the _second_ version number indicates internal binary compatibility. This is not strictly specified in [pvp][pvp], but is compatible with it ([pvp][pvp] doesn't dictate when you should change the first or second version number).
+
+The reason this project chooses to use [pvp][pvp] rather than the more common [Early Semver][early-semver] is so that we can provide longer support to our users.
+
+For example, if a dependency of an errors4s project makes a binary breaking change we can release a new version with an incremented _first_ version number, but still keep releasing versions for the previous dependency set as well. With [semver][semver] or [early-semver][early-semver] you can only release updates to non-head branches which are non-breaking in _any way_, but with [pvp][pvp] we are free to break our internal binary API if we absolutely need to do so, even on old branches. It should be noted that this project goes to extreme lengths to _not break our binary API in any case_, but being able to do so means we can realistically support old branches indefinitely.
+
+## But this project has no dependencies, so what's the point? ##
+
+Ah, that's true. At the time of writing errors4s-core has no external dependencies, so using [pvp][pvp] doesn't gain us much here, but this is not true for the other errors4s projects. Since we do want to use [pvp][pvp] for our other projects (so we can support our users as long as possible), and since we _could_ add dependencies in the future, and since [pvp][pvp] is strictly more expressive than both [early-semver][early-semver] and [semver][semver], we decided to use it across the board on our projects.
+
 [refined]: https://github.com/refined "refined"
+
+[pvp]: https://pvp.haskell.org/ "PVP"
+
+[semver]: https://semver.org/ "Semver"
+
+[sbt-version-scheme-enforcer-pvp]: https://github.com/isomarcte/sbt-version-scheme-enforcer/#why-does-this-plugin-exist "SBT Version Scheme Enforcer"
+
+[early-semver]: https://scala-lang.org/blog/2021/02/16/preventing-version-conflicts-with-versionscheme.html "Early Semver"
