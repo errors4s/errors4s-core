@@ -182,7 +182,7 @@ lazy val docs = (project.in(file("errors4s-core-docs")))
           version.value
         }
 
-      Map("LATEST_RELEASE" -> latestRelease, "SCALA_VERSION" -> scalaBinaryVersion.value)
+      Map("LATEST_RELEASE" -> latestRelease, "SCALA_VERSION" -> "2.13")
     },
     mdocIn := file("docs-src"),
     mdocOut := file("docs")
