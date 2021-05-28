@@ -7,7 +7,7 @@ import _root_.org.errors4s.sbt._
 lazy val org           = "org.errors4s"
 lazy val jreVersion    = "16"
 lazy val projectName   = "errors4s-core"
-lazy val projectUrl    = url("https://github.com/errors4s/errors4s")
+lazy val projectUrl    = url(s"https://github.com/errors4s/${projectName}")
 lazy val scala212      = "2.12.13"
 lazy val scala213      = "2.13.6"
 lazy val scala30       = "3.0.0"
@@ -27,6 +27,9 @@ def initialImports(packages: List[String], isScala3: Boolean): String = {
 
   packages.map(value => s"import ${value}.${wildcard}").mkString("\n")
 }
+
+def isCurrentVersionSnapshot(value: String): Boolean =
+  value.endsWith("SNAPSHOT")
 
 // Common Settings //
 
@@ -53,7 +56,7 @@ ThisBuild / githubWorkflowBuild := List(WorkflowStep.Sbt(List("versionSchemeEnfo
 // Doc Settings
 
 lazy val docSettings: List[Def.Setting[_]] = List(
-  apiURL := Some(url(s"https://www.javadoc.io/doc/org/errors4s_${scalaBinaryVersion.value}/latest/index.html")),
+  apiURL := Some(url(s"https://www.javadoc.io/doc/org/${projectName}_${scalaBinaryVersion.value}/${version.value}/index.html")),
   autoAPIMappings := true,
   Compile / doc / apiMappings := {
     if (isScala3(scalaBinaryVersion.value)) {
@@ -68,7 +71,7 @@ lazy val docSettings: List[Def.Setting[_]] = List(
       case Some((3, _)) =>
         List(
           s"-external-mappings:.*java.*::javadoc::https://docs.oracle.com/en/java/javase/${jreVersion}/docs/api/java.base/",
-          "-social-links:github::https://github.com/errors4s/errors4s"
+          s"-social-links:github::https://github.com/errors4s/${projectName}"
         )
       case Some((2, n)) =>
         List("-language:experimental.macros") ++
@@ -85,7 +88,7 @@ lazy val docSettings: List[Def.Setting[_]] = List(
 
 lazy val commonSettings: List[Def.Setting[_]] =
   List(
-    scalaVersion := scala213,
+    scalaVersion := scala30,
     scalacOptions := {
       scalacOptions.value ++
         (if (isScala3(scalaBinaryVersion.value)) {
@@ -129,7 +132,7 @@ lazy val publishSettings = List(
     else
       Some("releases" at nexus + "service/local/staging/deploy/maven2")
   },
-  scmInfo := Some(ScmInfo(projectUrl, "scm:git:git@github.com:errors4s/errors4s.git")),
+  scmInfo := Some(ScmInfo(projectUrl, s"scm:git:git@github.com:errors4s/${projectName}.git")),
   developers :=
     List(Developer("isomarcte", "David Strawn", "isomarcte@gmail.com", url("https://github.com/isomarcte"))),
   credentials += Credentials(Path.userHome / ".sbt" / ".credentials")
@@ -137,7 +140,7 @@ lazy val publishSettings = List(
 
 // Root //
 
-lazy val errors4s = (project in file("."))
+lazy val root = (project in file("."))
   .settings(commonSettings, publishSettings)
   .settings(
     List(
@@ -173,11 +176,21 @@ lazy val docs = (project.in(file("errors4s-core-docs")))
   .settings(commonSettings)
   .settings(
     name := s"${projectName}-docs",
-    mdocVariables :=
+    mdocVariables := {
+      val latestRelease: String = {
+        val v: String = version.value
+        if (isCurrentVersionSnapshot(v)) {
+          versionSchemeEnforcerPreviousVersion.value.getOrElse("latest")
+        } else {
+          v
+        }
+      }
+
       Map(
-        "LATEST_RELEASE" -> versionSchemeEnforcerPreviousVersion.value.getOrElse("latest"),
-        "SCALA_VERSION"  -> "2.13"
-      ),
+        "LATEST_RELEASE" -> latestRelease,
+        "SCALA_VERSION"  -> scalaBinaryVersion.value
+      )
+    },
     mdocIn := file("docs-src"),
     mdocOut := file("docs")
   )
