@@ -28,9 +28,6 @@ def initialImports(packages: List[String], isScala3: Boolean): String = {
   packages.map(value => s"import ${value}.${wildcard}").mkString("\n")
 }
 
-def isCurrentVersionSnapshot(value: String): Boolean =
-  value.endsWith("SNAPSHOT")
-
 // Common Settings //
 
 ThisBuild / crossScalaVersions := scalaVersions.toSeq
@@ -56,7 +53,8 @@ ThisBuild / githubWorkflowBuild := List(WorkflowStep.Sbt(List("versionSchemeEnfo
 // Doc Settings
 
 lazy val docSettings: List[Def.Setting[_]] = List(
-  apiURL := Some(url(s"https://www.javadoc.io/doc/org/${projectName}_${scalaBinaryVersion.value}/${version.value}/index.html")),
+  apiURL :=
+    Some(url(s"https://www.javadoc.io/doc/org/${projectName}_${scalaBinaryVersion.value}/${version.value}/index.html")),
   autoAPIMappings := true,
   Compile / doc / apiMappings := {
     if (isScala3(scalaBinaryVersion.value)) {
@@ -177,19 +175,14 @@ lazy val docs = (project.in(file("errors4s-core-docs")))
   .settings(
     name := s"${projectName}-docs",
     mdocVariables := {
-      val latestRelease: String = {
-        val v: String = version.value
-        if (isCurrentVersionSnapshot(v)) {
+      val latestRelease: String =
+        if (isSnapshot.value) {
           versionSchemeEnforcerPreviousVersion.value.getOrElse("latest")
         } else {
-          v
+          version.value
         }
-      }
 
-      Map(
-        "LATEST_RELEASE" -> latestRelease,
-        "SCALA_VERSION"  -> scalaBinaryVersion.value
-      )
+      Map("LATEST_RELEASE" -> latestRelease, "SCALA_VERSION" -> scalaBinaryVersion.value)
     },
     mdocIn := file("docs-src"),
     mdocOut := file("docs")
