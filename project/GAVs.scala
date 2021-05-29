@@ -16,6 +16,7 @@ object GAVs {
     lazy val munitA: String            = "munit"
     lazy val organizeImportsA: String  = "organize-imports"
     lazy val scalaReflectA: String     = "scala-reflect"
+    lazy val semanticdbA: String       = "semanticdb-scalac"
   }
 
   object V {
@@ -23,5 +24,6 @@ object GAVs {
     lazy val kindProjectorV: String    = "0.13.0"
     lazy val munitV: String            = "0.7.26"
     lazy val organizeImportsV: String  = "0.4.4"
+    lazy val semanticdbV: String       = "4.4.20"
   }
 }

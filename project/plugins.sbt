@@ -4,7 +4,7 @@ addSbtPlugin("com.eed3si9n"              % "sbt-unidoc"                         
 addSbtPlugin("com.github.cb372"          % "sbt-explicit-dependencies"          % "0.2.16")
 addSbtPlugin("com.jsuereth"              % "sbt-pgp"                            % "2.1.1")
 addSbtPlugin("com.timushev.sbt"          % "sbt-updates"                        % "0.5.3")
-addSbtPlugin("io.github.davidgregory084" % "sbt-tpolecat"                       % "0.1.17")
+addSbtPlugin("io.github.davidgregory084" % "sbt-tpolecat"                       % "0.1.19")
 addSbtPlugin("io.isomarcte"              % "sbt-version-scheme-enforcer-plugin" % "2.1.0.0")
 addSbtPlugin("org.scalameta"             % "sbt-mdoc"                           % "2.2.21")
 addSbtPlugin("org.scalameta"             % "sbt-scalafmt"                       % "2.4.2")

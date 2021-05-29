@@ -8,10 +8,18 @@ lazy val org           = "org.errors4s"
 lazy val jreVersion    = "16"
 lazy val projectName   = "errors4s-core"
 lazy val projectUrl    = url(s"https://github.com/errors4s/${projectName}")
-lazy val scala212      = "2.12.13"
+lazy val scala212      = "2.12.14"
 lazy val scala213      = "2.13.6"
 lazy val scala30       = "3.0.0"
 lazy val scalaVersions = Set(scala212, scala213, scala30)
+
+// SBT Command Aliases //
+
+// Usually run before making a PR
+addCommandAlias(
+  "full_build",
+  s";+clean;githubWorkflowGenerate;+test;+test:doc;+versionSchemeEnforcerCheck;++${scala213};scalafmtAll;scalafmtSbt;scalafixAll;docs/mdoc"
+)
 
 // Functions //
 
@@ -27,6 +35,10 @@ def initialImports(packages: List[String], isScala3: Boolean): String = {
 
   packages.map(value => s"import ${value}.${wildcard}").mkString("\n")
 }
+
+// Dependency Overrides //
+
+ThisBuild / dependencyOverrides += G.scalametaG % A.semanticdbA % V.semanticdbV cross CrossVersion.full
 
 // Common Settings //
 
@@ -88,17 +100,23 @@ lazy val commonSettings: List[Def.Setting[_]] =
   List(
     scalaVersion := scala30,
     scalacOptions := {
-      scalacOptions.value ++
-        (if (isScala3(scalaBinaryVersion.value)) {
-           List("-source:3.0-migration") ++
-             (if (JREMajorVersion.majorVersion > 8) {
-                List("-release:8")
-              } else {
-                Nil
-              })
-         } else {
-           List("-target:jvm-1.8", "-Wconf:cat=unused-imports:info")
-         })
+      val currentOptions: Seq[String] = scalacOptions.value
+      (
+        if (isScala3(scalaBinaryVersion.value)) {
+          // Remove -source since as of 0.1.19 of sbt-tpolecat it sets -source
+          // to be `-source:future`, but we only want that on sources which are
+          // _strictly_ Scala 3, we want `-source:3.0-migration` from cross
+          // compiled sources.
+          currentOptions.filterNot(_.startsWith("-source")) ++ List("-source:3.0-migration") ++
+            (if (JREMajorVersion.majorVersion > 8) {
+               List("-release:8")
+             } else {
+               Nil
+             })
+        } else {
+          currentOptions ++ List("-target:jvm-1.8", "-Wconf:cat=unused-imports:info")
+        }
+      )
     },
     libraryDependencies ++= {
       if (isScala3(scalaBinaryVersion.value)) {
