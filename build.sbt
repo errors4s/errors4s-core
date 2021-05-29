@@ -18,7 +18,7 @@ lazy val scalaVersions = Set(scala212, scala213, scala30)
 // Usually run before making a PR
 addCommandAlias(
   "full_build",
-  s";+clean;githubWorkflowGenerate;+test;+test:doc;+versionSchemeEnforcerCheck;++${scala213};scalafmtAll;scalafmtSbt;scalafixAll;docs/mdoc"
+  s";+clean;githubWorkflowGenerate;+test;+test:doc;+versionSchemeEnforcerCheck;++${scala213};scalafmtAll;scalafmtSbt;scalafixAll;++${scala30};docs/mdoc"
 )
 
 // Functions //
@@ -64,9 +64,11 @@ ThisBuild / githubWorkflowBuild := List(WorkflowStep.Sbt(List("versionSchemeEnfo
 
 // Doc Settings
 
+def scaladocLink(scalaBinaryVersion: String, version: String): String =
+  s"https://www.javadoc.io/doc/${org}/${projectName}_${scalaBinaryVersion}/${version}/index.html"
+
 lazy val docSettings: List[Def.Setting[_]] = List(
-  apiURL :=
-    Some(url(s"https://www.javadoc.io/doc/org/${projectName}_${scalaBinaryVersion.value}/${version.value}/index.html")),
+  apiURL := Some(url(scaladocLink(scalaBinaryVersion.value, version.value))),
   autoAPIMappings := true,
   Compile / doc / apiMappings := {
     if (isScala3(scalaBinaryVersion.value)) {
@@ -199,8 +201,15 @@ lazy val docs = (project.in(file("errors4s-core-docs")))
         } else {
           version.value
         }
+      val scalaBinVer: String = scalaBinaryVersion.value
 
-      Map("LATEST_RELEASE" -> latestRelease, "SCALA_VERSION" -> "2.13")
+      Map(
+        "LATEST_RELEASE"       -> latestRelease,
+        "SCALA_BINARY_VERSION" -> scalaBinVer,
+        "SCALADOC_LINK"        -> scaladocLink(scalaBinVer, latestRelease),
+        "ORG"                  -> org,
+        "PROJECT_NAME"         -> projectName
+      )
     },
     mdocIn := file("docs-src"),
     mdocOut := file("docs")
