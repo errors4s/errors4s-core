@@ -15,7 +15,7 @@ Errors4s is a family of projects which attempt to provide a better base error ty
 Add this to your `libraryDependencies` in your `build.sbt`.
 
 ```scala
-    org.errors4s %% errors4s-core % 1.0.0.0-RC0
+    "org.errors4s" %% "errors4s-core" % "1.0.0.0-RC0"
 ```
 
 ## How is this different from Throwable? ##

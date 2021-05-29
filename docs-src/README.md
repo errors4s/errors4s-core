@@ -15,7 +15,7 @@ Errors4s is a family of projects which attempt to provide a better base error ty
 Add this to your `libraryDependencies` in your `build.sbt`.
 
 ```scala
-    @ORG@ %% @PROJECT_NAME@ % @LATEST_RELEASE@
+    "@ORG@" %% "@PROJECT_NAME@" % "@LATEST_RELEASE@"
 ```
 
 ## How is this different from Throwable? ##
