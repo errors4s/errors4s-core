@@ -4,11 +4,19 @@
 
 [The Scaladoc for errors4s-core may be viewed here][javadoc].
 
-[javadoc]: https://www.javadoc.io/doc/org/errors4s-core_2.13/1.0.0.0-RC0/index.html "Scaladoc"
+[javadoc]: https://www.javadoc.io/doc/org.errors4s/errors4s-core_3/1.0.0.0-RC0/index.html "Scaladoc"
 
 # Overview #
 
 Errors4s is a family of projects which attempt to provide a better base error type than `java.lang.Throwable`. The foundation for which is the `org.errors4s.core.Error` type.
+
+## Using ##
+
+Add this to your `libraryDependencies` in your `build.sbt`.
+
+```scala
+    org.errors4s %% errors4s-core % 1.0.0.0-RC0
+```
 
 ## How is this different from Throwable? ##
 
