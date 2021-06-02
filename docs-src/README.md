@@ -48,7 +48,7 @@ In version <= 0.1.x of this project the `NonEmptyString` type from the excellent
 
 `NonEmptyString` values can not be directly created at runtime. The only method to directly create them is `from` which returns an `Either[String, NonEmptyString]`, which is `Left` if the given `String` is `null` or `""`.
 
-```scala mdoc
+```scala mdoc:to-string
 import org.errors4s.core._
 
 NonEmptyString.from("")
@@ -90,7 +90,7 @@ val value: NonEmptyString = base :+ port.toString
 
 They are all pretty straight forward, effectively allowing convenient access to all the permutations of an `Error` encoding.
 
-```scala mdoc
+```scala mdoc:to-string
 Error.withMessage(nes"An error has occurred")
 Error.withMessages(nes"An error has occurred", "It was very bad")
 Error.withMessagesAndCause(nes"An error has occurred", "It was very bad", Error.withMessage(nes"This was the cause"))
@@ -98,7 +98,7 @@ Error.withMessagesAndCause(nes"An error has occurred", "It was very bad", Error.
 
 As mentioned above, `getMessage` aggregates the entire error context together. For example,
 
-```scala mdoc
+```scala mdoc:to-string
 Error.withMessagesAndCause(nes"An error has occurred", "It was very bad", Error.withMessage(nes"This was the cause")).getMessage
 ```
 
