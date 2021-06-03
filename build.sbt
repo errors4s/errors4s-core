@@ -60,7 +60,19 @@ ThisBuild / versionScheme := Some("pvp")
 ThisBuild / githubWorkflowPublishTargetBranches := Nil
 ThisBuild / githubWorkflowOSes := Set("macos-latest", "ubuntu-latest").toList
 ThisBuild / githubWorkflowJavaVersions := Set("adopt@1.16", "adopt@1.11", "adopt@1.8").toList
-ThisBuild / githubWorkflowBuild := List(WorkflowStep.Sbt(List("versionSchemeEnforcerCheck", "Test / doc")))
+ThisBuild / githubWorkflowBuildPreamble :=
+  List(
+    WorkflowStep.Sbt(
+      List(
+        "versionSchemeEnforcerCheck",
+        "Test / doc",
+        "undeclaredCompileDependenciesTest",
+        "unusedCompileDependenciesTest",
+        "Test / undeclaredCompileDependenciesTest",
+        "Test / unusedCompileDependenciesTest"
+      )
+    )
+  )
 
 // Doc Settings
 
