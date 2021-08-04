@@ -6,10 +6,10 @@ import scala.util._
   *
   * Derived from the Java code which does this for the Metals ArchLinux package.
   *
-  * JREs >= 9 can use `java.lang.Runtime.version`, but since we sadly still
-  * care about 8, we can't use that.
+  * JREs >= 9 can use `java.lang.Runtime.version`, but since we sadly still care about 8, we can't use that.
   *
-  * @see [[https://aur.archlinux.org/cgit/aur.git/tree/JREMajorVersion.java?h=metals]]
+  * @see
+  *   [[https://aur.archlinux.org/cgit/aur.git/tree/JREMajorVersion.java?h=metals]]
   */
 object JREMajorVersion {
 

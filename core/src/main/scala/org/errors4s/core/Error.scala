@@ -124,16 +124,25 @@ object Error {
   def withMessage(errorMessage: NonEmptyString): Error = ErrorImpl(errorMessage, Vector.empty, Vector.empty)
 
   /** Create an [[Error]] from an error message and a single secondary error message. */
-  def withMessages(errorMessage: NonEmptyString, secondaryErrorMessage: String): Error =
-    ErrorImpl(errorMessage, Vector(secondaryErrorMessage), Vector.empty)
+  def withMessages(errorMessage: NonEmptyString, secondaryErrorMessage: String): Error = ErrorImpl(
+    errorMessage,
+    Vector(secondaryErrorMessage),
+    Vector.empty
+  )
 
   /** Create an [[Error]] from an error message and a set of secondary error messages. */
-  def withMessages_(errorMessage: NonEmptyString, secondaryErrorMessages: Vector[String]): Error =
-    ErrorImpl(errorMessage, secondaryErrorMessages, Vector.empty)
+  def withMessages_(errorMessage: NonEmptyString, secondaryErrorMessages: Vector[String]): Error = ErrorImpl(
+    errorMessage,
+    secondaryErrorMessages,
+    Vector.empty
+  )
 
   /** Create an [[Error]] from an error message and a [[java.lang.Throwable]] cause. */
-  def withMessageAndCause(errorMessage: NonEmptyString, cause: Throwable): Error =
-    ErrorImpl(errorMessage, Vector.empty, Vector(cause))
+  def withMessageAndCause(errorMessage: NonEmptyString, cause: Throwable): Error = ErrorImpl(
+    errorMessage,
+    Vector.empty,
+    Vector(cause)
+  )
 
   /** Create an [[Error]] from an error message, a secondary error message, and a [[java.lang.Throwable]] cause. */
   def withMessagesAndCause(errorMessage: NonEmptyString, secondaryErrorMessage: String, cause: Throwable): Error =

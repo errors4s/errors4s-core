@@ -18,7 +18,7 @@ lazy val scalaVersions = Set(scala212, scala213, scala30)
 // Usually run before making a PR
 addCommandAlias(
   "full_build",
-  s";+clean;githubWorkflowGenerate;+test;+test:doc;+versionSchemeEnforcerCheck;++${scala213};scalafmtAll;scalafmtSbt;scalafixAll;++${scala30};docs/mdoc"
+  s";+clean;githubWorkflowGenerate;+test;+test:doc;+versionSchemeEnforcerCheck;++${scala213};scalafmtAll;scalafmtSbt;scalafixAll;docs/mdoc"
 )
 
 // Functions //
@@ -45,9 +45,9 @@ ThisBuild / dependencyOverrides += G.scalametaG % A.semanticdbA % V.semanticdbV 
 ThisBuild / crossScalaVersions := scalaVersions.toSeq
 
 ThisBuild / organization := org
-ThisBuild / scalaVersion := scala30
+ThisBuild / scalaVersion := scala213
 ThisBuild / scalafixDependencies ++= List(G.organizeImportsG %% A.organizeImportsA % V.organizeImportsV)
-ThisBuild / scalafixScalaBinaryVersion := "2.13"
+ThisBuild / scalafixScalaBinaryVersion := scalaBinaryVersion.value
 ThisBuild / semanticdbEnabled := true
 ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
 
@@ -184,7 +184,7 @@ lazy val root = (project in file("."))
       Compile / packageSrc / publishArtifact := false
     )
   )
-  .aggregate(core, scalacheck)
+  .aggregate(core, scalacheck, cats)
   .disablePlugins(SbtVersionSchemeEnforcerPlugin)
 
 // Core //
@@ -208,7 +208,7 @@ lazy val core = project
 lazy val scalacheck = project
   .settings(commonSettings, publishSettings)
   .settings(
-    name := s"${projectName}",
+    name := s"${projectName}-scalacheck",
     console / initialCommands :=
       List(
         "org.errors4s.core._",
@@ -216,9 +216,35 @@ lazy val scalacheck = project
         "org.errors4s.core.scalacheck.instances._",
         "org.scalacheck._"
       ).map(value => s"import $value").mkString("\n"),
+    libraryDependencies ++= List(G.scalacheckG %% A.scalacheckA % V.scalacheckV)
+  )
+  .dependsOn(core)
+
+lazy val cats = project
+  .settings(commonSettings, publishSettings)
+  .settings(
+    name := s"${projectName}-cats",
+    console / initialCommands :=
+      initialImports(
+        List("org.errors4s.core", "org.errors4s.core.syntax.all", "org.errors4s.core.cats.instances"),
+        isScala3(scalaBinaryVersion.value)
+      ),
+    libraryDependencies ++= {
+      if (isScala3(scalaBinaryVersion.value)) {
+        Nil
+      } else {
+        List(G.scalaLangG % A.scalaReflectA % scalaVersion.value % Test)
+      }
+    },
+    libraryDependencies ++= List(G.typelevelG %% A.catsCoreA % V.catsV, G.typelevelG %% A.catsKernelA % V.catsV),
     libraryDependencies ++=
-      List(G.scalacheckG %% A.scalacheckA % V.scalacheckV)
-  ).dependsOn(core)
+      List(
+        G.scalametaG %% A.munitA           % V.munitV,
+        G.typelevelG %% A.catsLawsA        % V.catsV,
+        G.typelevelG %% A.disciplineMunitA % V.disciplineMunitV
+      ).map(_ % Test)
+  )
+  .dependsOn(core, scalacheck % "test->compile")
 
 // Docs //
 
@@ -236,15 +262,17 @@ lazy val docs = (project.in(file("errors4s-core-docs")))
       val scalaBinVer: String = scalaBinaryVersion.value
 
       Map(
-        "LATEST_RELEASE"       -> latestRelease,
-        "SCALA_BINARY_VERSION" -> scalaBinVer,
-        "SCALADOC_LINK"        -> scaladocLink(scalaBinVer, latestRelease),
-        "ORG"                  -> org,
-        "PROJECT_NAME"         -> projectName
+        "LATEST_RELEASE"           -> latestRelease,
+        "SCALA_BINARY_VERSION"     -> scalaBinVer,
+        "CORE_SCALADOC_LINK"       -> scaladocLink(scalaBinVer, latestRelease),
+        "SCALACHECK_SCALADOC_LINK" -> scaladocLink(scalaBinVer, latestRelease),
+        "CATS_SCALADOC_LINK"       -> scaladocLink(scalaBinVer, latestRelease),
+        "ORG"                      -> org,
+        "PROJECT_NAME"             -> projectName
       )
     },
     mdocIn := file("docs-src"),
     mdocOut := file("docs")
   )
-  .dependsOn(core, scalacheck)
+  .dependsOn(core, scalacheck, cats)
   .enablePlugins(MdocPlugin)

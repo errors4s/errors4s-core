@@ -2,13 +2,26 @@
 
 # ScalaDoc #
 
-[The Scaladoc for errors4s-core may be viewed here][javadoc].
+* [core][core-javadoc]
+* [cats][cats-javadoc]
+* [scalacheck][scalacheck-javadoc]
 
-[javadoc]: @SCALADOC_LINK@ "Scaladoc"
+[core-javadoc]: @CORE_SCALADOC_LINK@ "Core Scaladoc"
+[cats-javadoc]: @CATS_SCALADOC_LINK@ "Cats Scaladoc"
+[scalacheck-javadoc]: @SCALACHECK_SCALADOC_LINK@ "Scalacheck Scaladoc"
 
 # Overview #
 
 Errors4s is a family of projects which attempt to provide a better base error type than `java.lang.Throwable`. The foundation for which is the `org.errors4s.core.Error` type.
+
+This project provides three built in modules.
+
+* core
+    * Fundamental datatypes
+* cats
+    * Cats instances for core
+* scalacheck
+    * Scalacheck instances for core
 
 ## Using ##
 
@@ -40,7 +53,9 @@ If these situations are not something which concerns you and you have no use for
 
 # API Overview #
 
-## NonEmptyString ##
+## Core ##
+
+### NonEmptyString ###
 
 Before we look at the API of `Error` itself, we should take a brief look at the API for `NonEmptyString`.
 
@@ -84,7 +99,7 @@ val base: NonEmptyString = NonEmptyString("Invalid port number: ")
 val value: NonEmptyString = base :+ port.toString
 ```
 
-## Error ##
+### Error ###
 
 `Error` is provided as a `trait` so that it can be extended to provide the base for specialized error types, but it's companion object also provides methods to create instances of `Error` directly if you do not need anything fancy.
 
@@ -101,6 +116,56 @@ As mentioned above, `getMessage` aggregates the entire error context together. F
 ```scala mdoc:to-string
 Error.withMessagesAndCause(nes"An error has occurred", "It was very bad", Error.withMessage(nes"This was the cause")).getMessage
 ```
+
+## Scalacheck ##
+
+Scalacheck instances for the types in `core` are provided in the `scalacheck` module. If you'd like to use them in your project you can add this to your `libraryDependencies`.
+
+```scala
+    "@ORG@" %% "@PROJECT_NAME@-scalacheck" % "@LATEST_RELEASE@"
+```
+
+The instances provided here are [orphan][orphan] instances. To use them you need to import the `org.errors4s.core.scalacheck.instances._` package. You will also need to have an underlying implicit [Arbitrary][scalacheck-arbitrary] or [Cogen][scalacheck-cogen] in scope.
+
+```scala mdoc:to-string
+import org.errors4s.core._
+import org.errors4s.core.scalacheck.instances._
+import org.scalacheck._
+
+implicitly[Arbitrary[NonEmptyString]]
+```
+
+[orphan]: https://wiki.haskell.org/Orphan_instance "Orphan"
+
+## Cats ##
+
+Instances of various [Cats][cats] typeclasses for the types in `core` are provided in the `cats` module. If you'd like to use them in your project you can add this to your `libraryDependencies`.
+
+```scala
+    "@ORG@" %% "@PROJECT_NAME@-cats" % "@LATEST_RELEASE@"
+```
+
+The instances provided here are [orphan][orphan] instances. To use them you need to import the `org.errors4s.core.cats.instances._` package.
+
+```scala mdoc:to-string:reset
+import cats._
+import org.errors4s.core._
+import org.errors4s.core.cats.instances._
+
+implicitly[Order[NonEmptyString]]
+```
+
+[cats]: https://github.com/typelevel/cats "Cats"
+
+# Version Matrix #
+
+This project uses [Package Versioning Policy (PVP)][pvp]. This is to allow long term support on a binary compatible release. (see the discussion at the end of the README)
+
+If you need support for a version combination which is not listed here, please open an issue and we will endeavor to add support for it if possible.
+
+|Version|Cats Version|Scalacheck Version|Scala 2.11|Scala 2.12|Scala 2.13|Scala 3.0|
+|-------|:----------:|:----------------:|:--------:|:--------:|:--------:|:-------:|
+|1.0.x.x|2.x.x       |1.x.x (>= 1.15.x) |No        |Yes       |Yes       |Yes      |
 
 # Versioning #
 

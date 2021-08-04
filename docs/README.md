@@ -2,13 +2,26 @@
 
 # ScalaDoc #
 
-[The Scaladoc for errors4s-core may be viewed here][javadoc].
+* [core][core-javadoc]
+* [cats][cats-javadoc]
+* [scalacheck][scalacheck-javadoc]
 
-[javadoc]: https://www.javadoc.io/doc/org.errors4s/errors4s-core_3/1.0.0.0-RC0/index.html "Scaladoc"
+[core-javadoc]: https://www.javadoc.io/doc/org.errors4s/errors4s-core_2.13/1.0.0.0-RC0/index.html "Core Scaladoc"
+[cats-javadoc]: https://www.javadoc.io/doc/org.errors4s/errors4s-core_2.13/1.0.0.0-RC0/index.html "Cats Scaladoc"
+[scalacheck-javadoc]: https://www.javadoc.io/doc/org.errors4s/errors4s-core_2.13/1.0.0.0-RC0/index.html "Scalacheck Scaladoc"
 
 # Overview #
 
 Errors4s is a family of projects which attempt to provide a better base error type than `java.lang.Throwable`. The foundation for which is the `org.errors4s.core.Error` type.
+
+This project provides three built in modules.
+
+* core
+    * Fundamental datatypes
+* cats
+    * Cats instances for core
+* scalacheck
+    * Scalacheck instances for core
 
 ## Using ##
 
@@ -40,7 +53,9 @@ If these situations are not something which concerns you and you have no use for
 
 # API Overview #
 
-## NonEmptyString ##
+## Core ##
+
+### NonEmptyString ###
 
 Before we look at the API of `Error` itself, we should take a brief look at the API for `NonEmptyString`.
 
@@ -67,7 +82,7 @@ The first is the `apply` method. This method uses a compile time macro (differen
 
 ```scala
 NonEmptyString("A non-empty string")
-// res3: NonEmptyString = "A non-empty string"
+// res3: NonEmptyString = NonEmptyStringImpl(value = "A non-empty string")
 ```
 
 This works well for many situations, but sometimes we want to provide some runtime context in our `NonEmptyString`. For that we can use the `nes` interpolator. The `nes` interpolator allows us to interpolate arbitrary values into our `NonEmptyString` as long as _at least some part of it is a non-empty string literal at compile time_. To use this we need to import `syntax.all` (or `syntax.nes`). For example,
@@ -79,20 +94,24 @@ val port: Int = 70000
 // port: Int = 70000
 
 nes"Invalid port number: ${port}"
-// res4: NonEmptyString = "Invalid port number: 70000"
+// res4: NonEmptyString = NonEmptyStringImpl(
+//   value = "Invalid port number: 70000"
+// )
 ```
 
 Once you have a `NonEmptyString` value you can also add arbitrary other `String` values to it, while retaining the `NonEmptyString`. Thus an alternative way to encode the above expression could have been,
 
 ```scala
 val base: NonEmptyString = NonEmptyString("Invalid port number: ")
-// base: NonEmptyString = "Invalid port number: "
+// base: NonEmptyString = NonEmptyStringImpl(value = "Invalid port number: ")
 
 val value: NonEmptyString = base :+ port.toString
-// value: NonEmptyString = "Invalid port number: 70000"
+// value: NonEmptyString = NonEmptyStringImpl(
+//   value = "Invalid port number: 70000"
+// )
 ```
 
-## Error ##
+### Error ###
 
 `Error` is provided as a `trait` so that it can be extended to provide the base for specialized error types, but it's companion object also provides methods to create instances of `Error` directly if you do not need anything fancy.
 
@@ -113,6 +132,58 @@ As mentioned above, `getMessage` aggregates the entire error context together. F
 Error.withMessagesAndCause(nes"An error has occurred", "It was very bad", Error.withMessage(nes"This was the cause")).getMessage
 // res8: String = Primary Error: An error has occurred, Secondary Errors(It was very bad), Causes(Primary Error: This was the cause)
 ```
+
+## Scalacheck ##
+
+Scalacheck instances for the types in `core` are provided in the `scalacheck` module. If you'd like to use them in your project you can add this to your `libraryDependencies`.
+
+```scala
+    "org.errors4s" %% "errors4s-core-scalacheck" % "1.0.0.0-RC0"
+```
+
+The instances provided here are [orphan][orphan] instances. To use them you need to import the `org.errors4s.core.scalacheck.instances._` package. You will also need to have an underlying implicit [Arbitrary][scalacheck-arbitrary] or [Cogen][scalacheck-cogen] in scope.
+
+```scala
+import org.errors4s.core._
+import org.errors4s.core.scalacheck.instances._
+import org.scalacheck._
+
+implicitly[Arbitrary[NonEmptyString]]
+// res9: Arbitrary[NonEmptyString] = org.scalacheck.ArbitraryLowPriority$$anon$1@3ad6dba0
+```
+
+[orphan]: https://wiki.haskell.org/Orphan_instance "Orphan"
+
+## Cats ##
+
+Instances of various [Cats][cats] typeclasses for the types in `core` are provided in the `cats` module. If you'd like to use them in your project you can add this to your `libraryDependencies`.
+
+```scala
+    "org.errors4s" %% "errors4s-core-cats" % "1.0.0.0-RC0"
+```
+
+The instances provided here are [orphan][orphan] instances. To use them you need to import the `org.errors4s.core.cats.instances._` package.
+
+```scala
+import cats._
+import org.errors4s.core._
+import org.errors4s.core.cats.instances._
+
+implicitly[Order[NonEmptyString]]
+// res11: Order[NonEmptyString] = org.errors4s.core.cats.NonEmptyStringInstances$$anon$1@982b813
+```
+
+[cats]: https://github.com/typelevel/cats "Cats"
+
+# Version Matrix #
+
+This project uses [Package Versioning Policy (PVP)][pvp]. This is to allow long term support on a binary compatible release. (see the discussion at the end of the README)
+
+If you need support for a version combination which is not listed here, please open an issue and we will endeavor to add support for it if possible.
+
+|Version|Cats Version|Scalacheck Version|Scala 2.11|Scala 2.12|Scala 2.13|Scala 3.0|
+|-------|:----------:|:----------------:|:--------:|:--------:|:--------:|:-------:|
+|1.0.x.x|2.x.x       |1.x.x (>= 1.15.x) |No        |Yes       |Yes       |Yes      |
 
 # Versioning #
 
