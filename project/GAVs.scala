@@ -6,6 +6,7 @@ object GAVs {
     lazy val betterMonadicForG: String = "com.olegpy"
     lazy val organizeImportsG: String  = "com.github.liancheng"
     lazy val scalaLangG: String        = "org.scala-lang"
+    lazy val scalacheckG: String       = "org.scalacheck"
     lazy val scalametaG: String        = "org.scalameta"
     lazy val typelevelG: String        = "org.typelevel"
   }
@@ -16,6 +17,7 @@ object GAVs {
     lazy val munitA: String            = "munit"
     lazy val organizeImportsA: String  = "organize-imports"
     lazy val scalaReflectA: String     = "scala-reflect"
+    lazy val scalacheckA: String       = "scalacheck"
     lazy val semanticdbA: String       = "semanticdb-scalac"
   }
 
@@ -24,6 +26,7 @@ object GAVs {
     lazy val kindProjectorV: String    = "0.13.0"
     lazy val munitV: String            = "0.7.26"
     lazy val organizeImportsV: String  = "0.4.4"
+    lazy val scalacheckV: String       = "1.15.4"
     lazy val semanticdbV: String       = "4.4.20"
   }
 }
