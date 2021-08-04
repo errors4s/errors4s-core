@@ -6,9 +6,9 @@
 * [cats][cats-javadoc]
 * [scalacheck][scalacheck-javadoc]
 
-[core-javadoc]: https://www.javadoc.io/doc/org.errors4s/errors4s-core_2.13/1.0.0.0-RC0/index.html "Core Scaladoc"
-[cats-javadoc]: https://www.javadoc.io/doc/org.errors4s/errors4s-core_2.13/1.0.0.0-RC0/index.html "Cats Scaladoc"
-[scalacheck-javadoc]: https://www.javadoc.io/doc/org.errors4s/errors4s-core_2.13/1.0.0.0-RC0/index.html "Scalacheck Scaladoc"
+[core-javadoc]: https://www.javadoc.io/doc/org.errors4s/errors4s-core_3/1.0.0.0-RC0/index.html "Core Scaladoc"
+[cats-javadoc]: https://www.javadoc.io/doc/org.errors4s/errors4s-core-cats_3/1.0.0.0-RC0/index.html "Cats Scaladoc"
+[scalacheck-javadoc]: https://www.javadoc.io/doc/org.errors4s/errors4s-core-scalacheck_3/1.0.0.0-RC0/index.html "Scalacheck Scaladoc"
 
 # Overview #
 
@@ -82,7 +82,7 @@ The first is the `apply` method. This method uses a compile time macro (differen
 
 ```scala
 NonEmptyString("A non-empty string")
-// res3: NonEmptyString = NonEmptyStringImpl(value = "A non-empty string")
+// res3: NonEmptyString = "A non-empty string"
 ```
 
 This works well for many situations, but sometimes we want to provide some runtime context in our `NonEmptyString`. For that we can use the `nes` interpolator. The `nes` interpolator allows us to interpolate arbitrary values into our `NonEmptyString` as long as _at least some part of it is a non-empty string literal at compile time_. To use this we need to import `syntax.all` (or `syntax.nes`). For example,
@@ -94,21 +94,17 @@ val port: Int = 70000
 // port: Int = 70000
 
 nes"Invalid port number: ${port}"
-// res4: NonEmptyString = NonEmptyStringImpl(
-//   value = "Invalid port number: 70000"
-// )
+// res4: NonEmptyString = "Invalid port number: 70000"
 ```
 
 Once you have a `NonEmptyString` value you can also add arbitrary other `String` values to it, while retaining the `NonEmptyString`. Thus an alternative way to encode the above expression could have been,
 
 ```scala
 val base: NonEmptyString = NonEmptyString("Invalid port number: ")
-// base: NonEmptyString = NonEmptyStringImpl(value = "Invalid port number: ")
+// base: NonEmptyString = "Invalid port number: "
 
 val value: NonEmptyString = base :+ port.toString
-// value: NonEmptyString = NonEmptyStringImpl(
-//   value = "Invalid port number: 70000"
-// )
+// value: NonEmptyString = "Invalid port number: 70000"
 ```
 
 ### Error ###
@@ -149,7 +145,7 @@ import org.errors4s.core.scalacheck.instances._
 import org.scalacheck._
 
 implicitly[Arbitrary[NonEmptyString]]
-// res9: Arbitrary[NonEmptyString] = org.scalacheck.ArbitraryLowPriority$$anon$1@3ad6dba0
+// res9: Arbitrary[NonEmptyString] = org.scalacheck.ArbitraryLowPriority$$anon$1@6e13cb60
 ```
 
 [orphan]: https://wiki.haskell.org/Orphan_instance "Orphan"
@@ -170,7 +166,7 @@ import org.errors4s.core._
 import org.errors4s.core.cats.instances._
 
 implicitly[Order[NonEmptyString]]
-// res11: Order[NonEmptyString] = org.errors4s.core.cats.NonEmptyStringInstances$$anon$1@982b813
+// res11: Order[NonEmptyString] = org.errors4s.core.cats.NonEmptyStringInstances$$anon$1@10345eb4
 ```
 
 [cats]: https://github.com/typelevel/cats "Cats"

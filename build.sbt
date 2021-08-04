@@ -64,8 +64,8 @@ ThisBuild / githubWorkflowBuild := List(WorkflowStep.Sbt(List("versionSchemeEnfo
 
 // Doc Settings
 
-def scaladocLink(scalaBinaryVersion: String, version: String): String =
-  s"https://www.javadoc.io/doc/${org}/${projectName}_${scalaBinaryVersion}/${version}/index.html"
+def scaladocLink(scalaBinaryVersion: String, module: String, version: String): String =
+  s"https://www.javadoc.io/doc/${org}/${module}_${scalaBinaryVersion}/${version}/index.html"
 
 def javadocIoLink(groupId: String, artifactId: String, depVersion: String, scalaBinaryVersion: Option[String]): String =
   scalaBinaryVersion
@@ -73,8 +73,8 @@ def javadocIoLink(groupId: String, artifactId: String, depVersion: String, scala
       s"https://www.javadoc.io/doc/${groupId}/${artifactId}_${scalaBinaryVersion}/${depVersion}/api/"
     )
 
-lazy val docSettings: List[Def.Setting[_]] = List(
-  apiURL := Some(url(scaladocLink(scalaBinaryVersion.value, version.value))),
+def docSettings(module: String): List[Def.Setting[_]] = List(
+  apiURL := Some(url(scaladocLink(scalaBinaryVersion.value, module, version.value))),
   autoAPIMappings := true,
   Compile / doc / apiMappings := {
     if (isScala3(scalaBinaryVersion.value)) {
@@ -148,7 +148,7 @@ lazy val commonSettings: List[Def.Setting[_]] =
       }
     },
     crossScalaVersions := scalaVersions.toSeq
-  ) ++ docSettings
+  )
 
 // Publish Settings //
 
@@ -190,7 +190,7 @@ lazy val root = (project in file("."))
 // Core //
 
 lazy val core = project
-  .settings(commonSettings, publishSettings)
+  .settings(commonSettings, publishSettings, docSettings(projectName))
   .settings(
     name := s"${projectName}",
     console / initialCommands :=
@@ -206,7 +206,7 @@ lazy val core = project
   )
 
 lazy val scalacheck = project
-  .settings(commonSettings, publishSettings)
+  .settings(commonSettings, publishSettings, docSettings(s"${projectName}-scalacheck"))
   .settings(
     name := s"${projectName}-scalacheck",
     console / initialCommands :=
@@ -221,7 +221,7 @@ lazy val scalacheck = project
   .dependsOn(core)
 
 lazy val cats = project
-  .settings(commonSettings, publishSettings)
+  .settings(commonSettings, publishSettings, docSettings(s"${projectName}-cats"))
   .settings(
     name := s"${projectName}-cats",
     console / initialCommands :=
@@ -264,9 +264,9 @@ lazy val docs = (project.in(file("errors4s-core-docs")))
       Map(
         "LATEST_RELEASE"           -> latestRelease,
         "SCALA_BINARY_VERSION"     -> scalaBinVer,
-        "CORE_SCALADOC_LINK"       -> scaladocLink(scalaBinVer, latestRelease),
-        "SCALACHECK_SCALADOC_LINK" -> scaladocLink(scalaBinVer, latestRelease),
-        "CATS_SCALADOC_LINK"       -> scaladocLink(scalaBinVer, latestRelease),
+        "CORE_SCALADOC_LINK"       -> scaladocLink(scalaBinVer, projectName, latestRelease),
+        "SCALACHECK_SCALADOC_LINK" -> scaladocLink(scalaBinVer, s"${projectName}-scalacheck", latestRelease),
+        "CATS_SCALADOC_LINK"       -> scaladocLink(scalaBinVer, s"${projectName}-cats", latestRelease),
         "ORG"                      -> org,
         "PROJECT_NAME"             -> projectName
       )
