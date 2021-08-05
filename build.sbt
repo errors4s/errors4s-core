@@ -115,39 +115,38 @@ def docSettings(module: String): List[Def.Setting[_]] = List(
   }
 )
 
-lazy val commonSettings: List[Def.Setting[_]] =
-  List(
-    scalacOptions := {
-      val currentOptions: Seq[String] = scalacOptions.value
-      (
-        if (isScala3(scalaBinaryVersion.value)) {
-          // Remove -source since as of 0.1.19 of sbt-tpolecat it sets -source
-          // to be `-source:future`, but we only want that on sources which are
-          // _strictly_ Scala 3, we want `-source:3.0-migration` from cross
-          // compiled sources.
-          currentOptions.filterNot(_.startsWith("-source")) ++ List("-source:3.0-migration") ++
-            (if (JREMajorVersion.majorVersion > 8) {
-               List("-release:8")
-             } else {
-               Nil
-             })
-        } else {
-          currentOptions ++ List("-target:jvm-1.8", "-Wconf:cat=unused-imports:info")
-        }
-      )
-    },
-    libraryDependencies ++= {
+lazy val commonSettings: List[Def.Setting[_]] = List(
+  scalacOptions := {
+    val currentOptions: Seq[String] = scalacOptions.value
+    (
       if (isScala3(scalaBinaryVersion.value)) {
-        Nil
+        // Remove -source since as of 0.1.19 of sbt-tpolecat it sets -source
+        // to be `-source:future`, but we only want that on sources which are
+        // _strictly_ Scala 3, we want `-source:3.0-migration` from cross
+        // compiled sources.
+        currentOptions.filterNot(_.startsWith("-source")) ++ List("-source:3.0-migration") ++
+          (if (JREMajorVersion.majorVersion > 8) {
+             List("-release:8")
+           } else {
+             Nil
+           })
       } else {
-        List(
-          compilerPlugin(G.betterMonadicForG %% A.betterMonadicForA % V.betterMonadicForV),
-          compilerPlugin(G.typelevelG         % A.kindProjectorA    % V.kindProjectorV cross CrossVersion.full)
-        )
+        currentOptions ++ List("-target:jvm-1.8", "-Wconf:cat=unused-imports:info")
       }
-    },
-    crossScalaVersions := scalaVersions.toSeq
-  )
+    )
+  },
+  libraryDependencies ++= {
+    if (isScala3(scalaBinaryVersion.value)) {
+      Nil
+    } else {
+      List(
+        compilerPlugin(G.betterMonadicForG %% A.betterMonadicForA % V.betterMonadicForV),
+        compilerPlugin(G.typelevelG         % A.kindProjectorA    % V.kindProjectorV cross CrossVersion.full)
+      )
+    }
+  },
+  crossScalaVersions := scalaVersions.toSeq
+)
 
 // Publish Settings //
 
