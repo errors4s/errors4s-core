@@ -6,9 +6,9 @@
 * [cats][cats-javadoc]
 * [scalacheck][scalacheck-javadoc]
 
-[core-javadoc]: https://www.javadoc.io/doc/org.errors4s/errors4s-core_2.13/1.0.0.0-RC0/index.html "Core Scaladoc"
-[cats-javadoc]: https://www.javadoc.io/doc/org.errors4s/errors4s-core-cats_2.13/1.0.0.0-RC0/index.html "Cats Scaladoc"
-[scalacheck-javadoc]: https://www.javadoc.io/doc/org.errors4s/errors4s-core-scalacheck_2.13/1.0.0.0-RC0/index.html "Scalacheck Scaladoc"
+[core-javadoc]: https://www.javadoc.io/doc/org.errors4s/errors4s-core_2.13/1.0.0.0/index.html "Core Scaladoc"
+[cats-javadoc]: https://www.javadoc.io/doc/org.errors4s/errors4s-core-cats_2.13/1.0.0.0/index.html "Cats Scaladoc"
+[scalacheck-javadoc]: https://www.javadoc.io/doc/org.errors4s/errors4s-core-scalacheck_2.13/1.0.0.0/index.html "Scalacheck Scaladoc"
 
 # Overview #
 
@@ -28,7 +28,7 @@ This project provides three built in modules.
 Add this to your `libraryDependencies` in your `build.sbt`.
 
 ```scala
-    "org.errors4s" %% "errors4s-core" % "1.0.0.0-RC0"
+    "org.errors4s" %% "errors4s-core" % "1.0.0.0"
 ```
 
 ## How is this different from Throwable? ##
@@ -138,7 +138,7 @@ Error.withMessagesAndCause(nes"An error has occurred", "It was very bad", Error.
 Scalacheck instances for the types in `core` are provided in the `scalacheck` module. If you'd like to use them in your project you can add this to your `libraryDependencies`.
 
 ```scala
-    "org.errors4s" %% "errors4s-core-scalacheck" % "1.0.0.0-RC0"
+    "org.errors4s" %% "errors4s-core-scalacheck" % "1.0.0.0"
 ```
 
 The instances provided here are [orphan][orphan] instances. To use them you need to import the `org.errors4s.core.scalacheck.instances._` package. You will also need to have an underlying implicit [Arbitrary][scalacheck-arbitrary] or [Cogen][scalacheck-cogen] in scope.
@@ -149,7 +149,7 @@ import org.errors4s.core.scalacheck.instances._
 import org.scalacheck._
 
 val arbitraryNES: Arbitrary[NonEmptyString] = implicitly[Arbitrary[NonEmptyString]]
-// arbitraryNES: Arbitrary[NonEmptyString] = org.scalacheck.ArbitraryLowPriority$$anon$1@1f2071a4
+// arbitraryNES: Arbitrary[NonEmptyString] = org.scalacheck.ArbitraryLowPriority$$anon$1@2095438f
 ```
 
 [orphan]: https://wiki.haskell.org/Orphan_instance "Orphan"
@@ -159,7 +159,7 @@ val arbitraryNES: Arbitrary[NonEmptyString] = implicitly[Arbitrary[NonEmptyStrin
 Instances of various [Cats][cats] typeclasses for the types in `core` are provided in the `cats` module. If you'd like to use them in your project you can add this to your `libraryDependencies`.
 
 ```scala
-    "org.errors4s" %% "errors4s-core-cats" % "1.0.0.0-RC0"
+    "org.errors4s" %% "errors4s-core-cats" % "1.0.0.0"
 ```
 
 The instances provided here are [orphan][orphan] instances. To use them you need to import the `org.errors4s.core.cats.instances._` package.
@@ -170,7 +170,7 @@ import org.errors4s.core._
 import org.errors4s.core.cats.instances._
 
 val catsOrderForNonEmptyString: Order[NonEmptyString] = implicitly[Order[NonEmptyString]]
-// catsOrderForNonEmptyString: Order[NonEmptyString] = org.errors4s.core.cats.NonEmptyStringInstances$$anon$1@48e6894d
+// catsOrderForNonEmptyString: Order[NonEmptyString] = org.errors4s.core.cats.NonEmptyStringInstances$$anon$1@56251ed9
 ```
 
 [cats]: https://github.com/typelevel/cats "Cats"

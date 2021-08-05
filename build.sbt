@@ -253,11 +253,9 @@ lazy val docs = (project.in(file("errors4s-core-docs")))
     name := s"${projectName}-docs",
     mdocVariables := {
       val latestRelease: String =
-        if (isSnapshot.value) {
-          versionSchemeEnforcerPreviousVersion.value.getOrElse("latest")
-        } else {
-          version.value
-        }
+        // Need to wait for sbt-version-scheme-enforcer 2.1.2.0 for this to
+        // work dynamically.
+        "1.0.0.0-RC0"
       val scalaBinVer: String = scalaBinaryVersion.value
 
       Map(
