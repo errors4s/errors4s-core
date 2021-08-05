@@ -117,7 +117,6 @@ def docSettings(module: String): List[Def.Setting[_]] = List(
 
 lazy val commonSettings: List[Def.Setting[_]] =
   List(
-    scalaVersion := scala30,
     scalacOptions := {
       val currentOptions: Seq[String] = scalacOptions.value
       (
