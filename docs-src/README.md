@@ -127,7 +127,7 @@ Scalacheck instances for the types in `core` are provided in the `scalacheck` mo
 
 The instances provided here are [orphan][orphan] instances. To use them you need to import the `org.errors4s.core.scalacheck.instances._` package. You will also need to have an underlying implicit [Arbitrary][scalacheck-arbitrary] or [Cogen][scalacheck-cogen] in scope.
 
-```scala mdoc
+```scala mdoc:silent
 import org.errors4s.core._
 import org.errors4s.core.scalacheck.instances._
 import org.scalacheck._
@@ -147,7 +147,7 @@ Instances of various [Cats][cats] typeclasses for the types in `core` are provid
 
 The instances provided here are [orphan][orphan] instances. To use them you need to import the `org.errors4s.core.cats.instances._` package.
 
-```scala mdoc:to-string:reset
+```scala mdoc:silent:reset
 import cats._
 import org.errors4s.core._
 import org.errors4s.core.cats.instances._

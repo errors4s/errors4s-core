@@ -149,7 +149,6 @@ import org.errors4s.core.scalacheck.instances._
 import org.scalacheck._
 
 val arbitraryNES: Arbitrary[NonEmptyString] = implicitly[Arbitrary[NonEmptyString]]
-// arbitraryNES: Arbitrary[NonEmptyString] = org.scalacheck.ArbitraryLowPriority$$anon$1@5b4705f5
 ```
 
 [orphan]: https://wiki.haskell.org/Orphan_instance "Orphan"
@@ -170,7 +169,6 @@ import org.errors4s.core._
 import org.errors4s.core.cats.instances._
 
 val catsOrderForNonEmptyString: Order[NonEmptyString] = implicitly[Order[NonEmptyString]]
-// catsOrderForNonEmptyString: Order[NonEmptyString] = org.errors4s.core.cats.NonEmptyStringInstances$$anon$1@21aa91f5
 ```
 
 [cats]: https://github.com/typelevel/cats "Cats"
