@@ -2,13 +2,26 @@
 
 # ScalaDoc #
 
-[The Scaladoc for errors4s-core may be viewed here][javadoc].
+* [core][core-javadoc]
+* [cats][cats-javadoc]
+* [scalacheck][scalacheck-javadoc]
 
-[javadoc]: @SCALADOC_LINK@ "Scaladoc"
+[core-javadoc]: @CORE_SCALADOC_LINK@ "Core Scaladoc"
+[cats-javadoc]: @CATS_SCALADOC_LINK@ "Cats Scaladoc"
+[scalacheck-javadoc]: @SCALACHECK_SCALADOC_LINK@ "Scalacheck Scaladoc"
 
 # Overview #
 
 Errors4s is a family of projects which attempt to provide a better base error type than `java.lang.Throwable`. The foundation for which is the `org.errors4s.core.Error` type.
+
+This project provides three built in modules.
+
+* core
+    * Fundamental datatypes
+* cats
+    * Cats instances for core
+* scalacheck
+    * Scalacheck instances for core
 
 ## Using ##
 
@@ -40,11 +53,13 @@ If these situations are not something which concerns you and you have no use for
 
 # API Overview #
 
-## NonEmptyString ##
+## Core ##
+
+### NonEmptyString ###
 
 Before we look at the API of `Error` itself, we should take a brief look at the API for `NonEmptyString`.
 
-In version <= 0.1.x of this project the `NonEmptyString` type from the excellent [refined][refined] project was used. However in an effort to keep the dependencies of this project as small as possible (in 1.0.0.0 we have no dependencies) and also to be able to express some more complex use cases, such as interpolation into a `NonEmptyString` with compile time literals, as of version 1.0.0.0 this project provides its own `org.errors4s.core.NonEmptyString` data type. This data type is primarily used for the `primaryErrorMessage` of each `Error`.
+In version <= 0.1.x of this project the `NonEmptyString` type from the excellent [refined][refined] project was used. However in an effort to keep the dependencies of this project as small as possible and also to be able to express some more complex use cases, such as interpolation into a `NonEmptyString` with compile time literals, as of version 1.0.0.0 this project provides its own `org.errors4s.core.NonEmptyString` data type. This data type is primarily used for the `primaryErrorMessage` of each `Error`.
 
 `NonEmptyString` values can not be directly created at runtime. The only method to directly create them is `from` which returns an `Either[String, NonEmptyString]`, which is `Left` if the given `String` is `null` or `""`.
 
@@ -62,13 +77,13 @@ Thankfully, `NonEmptyString` provides two mechanisms to safely create instances 
 
 The first is the `apply` method. This method uses a compile time macro (different ones for Scala 2 and 3) to check that the given `String` is a non-empty literal value. If it is, then it lifts it into a `NonEmptyString` instance, if it isn't then it yields a _compilation error_. For example,
 
-```scala mdoc
+```scala mdoc:to-string
 NonEmptyString("A non-empty string")
 ```
 
 This works well for many situations, but sometimes we want to provide some runtime context in our `NonEmptyString`. For that we can use the `nes` interpolator. The `nes` interpolator allows us to interpolate arbitrary values into our `NonEmptyString` as long as _at least some part of it is a non-empty string literal at compile time_. To use this we need to import `syntax.all` (or `syntax.nes`). For example,
 
-```scala mdoc
+```scala mdoc:to-string
 import org.errors4s.core.syntax.all._
 
 val port: Int = 70000
@@ -78,13 +93,13 @@ nes"Invalid port number: ${port}"
 
 Once you have a `NonEmptyString` value you can also add arbitrary other `String` values to it, while retaining the `NonEmptyString`. Thus an alternative way to encode the above expression could have been,
 
-```scala mdoc
+```scala mdoc:to-string
 val base: NonEmptyString = NonEmptyString("Invalid port number: ")
 
 val value: NonEmptyString = base :+ port.toString
 ```
 
-## Error ##
+### Error ###
 
 `Error` is provided as a `trait` so that it can be extended to provide the base for specialized error types, but it's companion object also provides methods to create instances of `Error` directly if you do not need anything fancy.
 
@@ -102,6 +117,56 @@ As mentioned above, `getMessage` aggregates the entire error context together. F
 Error.withMessagesAndCause(nes"An error has occurred", "It was very bad", Error.withMessage(nes"This was the cause")).getMessage
 ```
 
+## Scalacheck ##
+
+Scalacheck instances for the types in `core` are provided in the `scalacheck` module. If you'd like to use them in your project you can add this to your `libraryDependencies`.
+
+```scala
+    "@ORG@" %% "@PROJECT_NAME@-scalacheck" % "@LATEST_RELEASE@"
+```
+
+The instances provided here are [orphan][orphan] instances. To use them you need to import the `org.errors4s.core.scalacheck.instances._` package. You will also need to have an underlying implicit [Arbitrary][scalacheck-arbitrary] or [Cogen][scalacheck-cogen] in scope.
+
+```scala mdoc:silent
+import org.errors4s.core._
+import org.errors4s.core.scalacheck.instances._
+import org.scalacheck._
+
+val arbitraryNES: Arbitrary[NonEmptyString] = implicitly[Arbitrary[NonEmptyString]]
+```
+
+[orphan]: https://wiki.haskell.org/Orphan_instance "Orphan"
+
+## Cats ##
+
+Instances of various [Cats][cats] typeclasses for the types in `core` are provided in the `cats` module. If you'd like to use them in your project you can add this to your `libraryDependencies`.
+
+```scala
+    "@ORG@" %% "@PROJECT_NAME@-cats" % "@LATEST_RELEASE@"
+```
+
+The instances provided here are [orphan][orphan] instances. To use them you need to import the `org.errors4s.core.cats.instances._` package.
+
+```scala mdoc:silent:reset
+import cats._
+import org.errors4s.core._
+import org.errors4s.core.cats.instances._
+
+val catsOrderForNonEmptyString: Order[NonEmptyString] = implicitly[Order[NonEmptyString]]
+```
+
+[cats]: https://github.com/typelevel/cats "Cats"
+
+# Version Matrix #
+
+This project uses [Package Versioning Policy (PVP)][pvp]. This is to allow long term support on a binary compatible release. (see the discussion at the end of the README)
+
+If you need support for a version combination which is not listed here, please open an issue and we will endeavor to add support for it if possible.
+
+|Version|Cats Version|Scalacheck Version|Scala 2.11|Scala 2.12|Scala 2.13|Scala 3.0|
+|-------|:----------:|:----------------:|:--------:|:--------:|:--------:|:-------:|
+|1.0.x.x|2.x.x       |1.x.x (>= 1.15.x) |No        |Yes       |Yes       |Yes      |
+
 # Versioning #
 
 ## PVP ##
@@ -117,10 +182,6 @@ By convention in this project (and the other errors4s projects) the _first_ vers
 The reason this project chooses to use [pvp][pvp] rather than the more common [Early Semver][early-semver] is so that we can provide longer support to our users.
 
 For example, if a dependency of an errors4s project makes a binary breaking change we can release a new version with an incremented _first_ version number, but still keep releasing versions for the previous dependency set as well. With [semver][semver] or [early-semver][early-semver] you can only release updates to non-head branches which are non-breaking in _any way_, but with [pvp][pvp] we are free to break our internal binary API if we absolutely need to do so, even on old branches. It should be noted that this project goes to extreme lengths to _not break our binary API in any case_, but being able to do so means we can realistically support old branches indefinitely.
-
-## But this project has no dependencies, so what's the point? ##
-
-Ah, that's true. At the time of writing errors4s-core has no external dependencies, so using [pvp][pvp] doesn't gain us much here, but this is not true for the other errors4s projects. Since we do want to use [pvp][pvp] for our other projects (so we can support our users as long as possible), and since we _could_ add dependencies in the future, and since [pvp][pvp] is strictly more expressive than both [early-semver][early-semver] and [semver][semver], we decided to use it across the board on our projects.
 
 [refined]: https://github.com/refined "refined"
 

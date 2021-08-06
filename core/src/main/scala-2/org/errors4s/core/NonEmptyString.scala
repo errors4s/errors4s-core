@@ -71,8 +71,8 @@ object NonEmptyString {
     * @note
     *   Use of this method for anything other than test code or the REPL is ''strongly'' discouraged.
     */
-  def unsafe(value: String): NonEmptyString =
-    from(value).fold(error => throw new IllegalArgumentException(error), identity)
+  def unsafe(value: String): NonEmptyString = from(value)
+    .fold(error => throw new IllegalArgumentException(error), identity)
 
   /** Append a [[java.lang.String]] to a [[NonEmptyString]] value. */
   def append(head: NonEmptyString, tail: String): NonEmptyString = NonEmptyStringImpl(head.value ++ tail)

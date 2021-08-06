@@ -12,12 +12,12 @@ object NonEmptyString {
   object opaques {
     opaque type NonEmptyString = String
 
-  /** Create a [[NonEmptyString]] value from an arbitrary [[java.lang.String]]
-    * value. This will throw an exception if the value is empty.
-    *
-    * @note Use of this method for anything other than test code or the REPL
-    *       is ''strongly'' discouraged.
-    */
+    /** Create a [[NonEmptyString]] value from an arbitrary [[java.lang.String]] value. This will throw an exception if
+      * the value is empty.
+      *
+      * @note
+      *   Use of this method for anything other than test code or the REPL is ''strongly'' discouraged.
+      */
     def unsafe(value: String): NonEmptyString =
       if (value.size <= 0) {
         throw new IllegalArgumentException("Can not create NonEmptyString from empty String.")
@@ -25,8 +25,7 @@ object NonEmptyString {
         value
       }
 
-    def value(nes: NonEmptyString): String =
-      nes
+    def value(nes: NonEmptyString): String = nes
   }
 
   export opaques.unsafe
@@ -36,35 +35,28 @@ object NonEmptyString {
 
     /** Append a [[java.lang.String]] to a [[NonEmptyString]] value.
       */
-    inline def :+(inline value: String): NonEmptyString =
-      append(nes, value)
+    inline def :+(inline value: String): NonEmptyString = append(nes, value)
 
-    /** Concatenate a [[java.lang.String]] value with this [[NonEmptyString]]
-      * value.
+    /** Concatenate a [[java.lang.String]] value with this [[NonEmptyString]] value.
       */
-    inline def ++(inline that: NonEmptyString): NonEmptyString =
-      concat(nes, that)
+    inline def ++(inline that: NonEmptyString): NonEmptyString = concat(nes, that)
   }
 
   extension (inline string: String) {
 
     /** Prepend a [[java.lang.String]] to a [[NonEmptyString]] value.
       */
-    inline def +:(inline nes: NonEmptyString): NonEmptyString =
-      prepend(string, nes)
+    inline def +:(inline nes: NonEmptyString): NonEmptyString = prepend(string, nes)
   }
 
-  /** Create a [[NonEmptyString]] value from a compile time literal
-    * [[java.lang.String]] value which is non-empty. This will fail to compile
-    * if the value is not a literal or is an empty literal, e.g. `""`.
+  /** Create a [[NonEmptyString]] value from a compile time literal [[java.lang.String]] value which is non-empty. This
+    * will fail to compile if the value is not a literal or is an empty literal, e.g. `""`.
     *
-    * @note This method only supports a compile time literal
-    *       [[java.lang.String]]. You can't interpolate into it. A more
-    *       powerful mechanism for creating a compile time [[NonEmptyString]]
-    *       value is the `nes` interpolator which can create a value and
-    *       interpolate arbitrary values into it as well, as long as at least
-    *       on component of the StringContext is a compile time non-empty
-    *       String literal.
+    * @note
+    *   This method only supports a compile time literal [[java.lang.String]]. You can't interpolate into it. A more
+    *   powerful mechanism for creating a compile time [[NonEmptyString]] value is the `nes` interpolator which can
+    *   create a value and interpolate arbitrary values into it as well, as long as at least on component of the
+    *   StringContext is a compile time non-empty String literal.
     *
     * {{{
     * scala> import org.errors4s.core.syntax.all._
@@ -84,8 +76,7 @@ object NonEmptyString {
       unsafe(value)
     }
 
-  /** Attempt to create a [[NonEmptyString]] from a [[java.lang.String]]
-    * value. This will fail if the value is empty.
+  /** Attempt to create a [[NonEmptyString]] from a [[java.lang.String]] value. This will fail if the value is empty.
     */
   inline def from(inline value: String): Either[String, NonEmptyString] =
     if (value == null) {
@@ -98,28 +89,33 @@ object NonEmptyString {
 
   /** Append a [[java.lang.String]] to a [[NonEmptyString]] value.
     */
-  inline def append(inline head: NonEmptyString, inline tail: String): NonEmptyString =
-    unsafe(head.value ++ tail)
+  inline def append(inline head: NonEmptyString, inline tail: String): NonEmptyString = unsafe(head.value ++ tail)
 
   /** Prepend a [[java.lang.String]] to a [[NonEmptyString]] value.
     */
-  inline def prepend(inline head: String, inline tail: NonEmptyString): NonEmptyString =
-    unsafe(head ++ tail.value)
+  inline def prepend(inline head: String, inline tail: NonEmptyString): NonEmptyString = unsafe(head ++ tail.value)
 
   /** Concatenate two [[NonEmptyString]] values. */
-  inline def concat(inline head: NonEmptyString, inline tail: NonEmptyString) =
-    append(head, tail.value)
+  inline def concat(inline head: NonEmptyString, inline tail: NonEmptyString) = append(head, tail.value)
 
   private inline def isEmpty(inline value: String): Boolean =
-    ${ isEmptyImpl('value) }
+    ${
+      isEmptyImpl('value)
+    }
 
   private def isEmptyImpl(expr: Expr[String])(using Quotes): Expr[Boolean] = {
     import quotes.reflect.report
-    expr.value.fold(
-      report.throwError("String value is not a literal constant. If at least part of the String is a literal constant, you can use the `nes` String interpolator. You can access it by import org.errors4s.core.syntax.all.*")
-    ){
-      case "" => Expr(true)
-      case _ => Expr(false)
-    }
+    expr
+      .value
+      .fold(
+        report.throwError(
+          "String value is not a literal constant. If at least part of the String is a literal constant, you can use the `nes` String interpolator. You can access it by import org.errors4s.core.syntax.all.*"
+        )
+      ) {
+        case "" =>
+          Expr(true)
+        case _ =>
+          Expr(false)
+      }
   }
 }

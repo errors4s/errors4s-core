@@ -10,7 +10,7 @@ lazy val projectName   = "errors4s-core"
 lazy val projectUrl    = url(s"https://github.com/errors4s/${projectName}")
 lazy val scala212      = "2.12.14"
 lazy val scala213      = "2.13.6"
-lazy val scala30       = "3.0.0"
+lazy val scala30       = "3.0.1"
 lazy val scalaVersions = Set(scala212, scala213, scala30)
 
 // SBT Command Aliases //
@@ -18,7 +18,7 @@ lazy val scalaVersions = Set(scala212, scala213, scala30)
 // Usually run before making a PR
 addCommandAlias(
   "full_build",
-  s";+clean;githubWorkflowGenerate;+test;+test:doc;+versionSchemeEnforcerCheck;++${scala213};scalafmtAll;scalafmtSbt;scalafixAll;++${scala30};docs/mdoc"
+  s";+clean;githubWorkflowGenerate;+test;+test:doc;+versionSchemeEnforcerCheck;++${scala213};scalafmtAll;scalafmtSbt;scalafixAll;docs/mdoc"
 )
 
 // Functions //
@@ -45,9 +45,9 @@ ThisBuild / dependencyOverrides += G.scalametaG % A.semanticdbA % V.semanticdbV 
 ThisBuild / crossScalaVersions := scalaVersions.toSeq
 
 ThisBuild / organization := org
-ThisBuild / scalaVersion := scala30
+ThisBuild / scalaVersion := scala213
 ThisBuild / scalafixDependencies ++= List(G.organizeImportsG %% A.organizeImportsA % V.organizeImportsV)
-ThisBuild / scalafixScalaBinaryVersion := "2.13"
+ThisBuild / scalafixScalaBinaryVersion := scalaBinaryVersion.value
 ThisBuild / semanticdbEnabled := true
 ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
 
@@ -64,11 +64,17 @@ ThisBuild / githubWorkflowBuild := List(WorkflowStep.Sbt(List("versionSchemeEnfo
 
 // Doc Settings
 
-def scaladocLink(scalaBinaryVersion: String, version: String): String =
-  s"https://www.javadoc.io/doc/${org}/${projectName}_${scalaBinaryVersion}/${version}/index.html"
+def scaladocLink(scalaBinaryVersion: String, module: String, version: String): String =
+  s"https://www.javadoc.io/doc/${org}/${module}_${scalaBinaryVersion}/${version}/index.html"
 
-lazy val docSettings: List[Def.Setting[_]] = List(
-  apiURL := Some(url(scaladocLink(scalaBinaryVersion.value, version.value))),
+def javadocIoLink(groupId: String, artifactId: String, depVersion: String, scalaBinaryVersion: Option[String]): String =
+  scalaBinaryVersion
+    .fold(s"https://www.javadoc.io/doc/${groupId}/${artifactId}/${depVersion}/api/")(scalaBinaryVersion =>
+      s"https://www.javadoc.io/doc/${groupId}/${artifactId}_${scalaBinaryVersion}/${depVersion}/api/"
+    )
+
+def docSettings(module: String): List[Def.Setting[_]] = List(
+  apiURL := Some(url(scaladocLink(scalaBinaryVersion.value, module, version.value))),
   autoAPIMappings := true,
   Compile / doc / apiMappings := {
     if (isScala3(scalaBinaryVersion.value)) {
@@ -82,8 +88,19 @@ lazy val docSettings: List[Def.Setting[_]] = List(
     CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((3, _)) =>
         List(
-          s"-external-mappings:.*java.*::javadoc::https://docs.oracle.com/en/java/javase/${jreVersion}/docs/api/java.base/",
-          s"-social-links:github::https://github.com/errors4s/${projectName}"
+          "-external-mappings:" +
+            List(
+              s".*java.*::javadoc::https://docs.oracle.com/en/java/javase/${jreVersion}/docs/api/java.base/",
+              """.*scala/.*::scaladoc3::http://dotty.epfl.ch/api/""",
+              s""".*org/scalacheck/.*::scaladoc3::${javadocIoLink(
+                G.scalacheckG,
+                A.scalacheckA,
+                V.scalacheckV,
+                Some("3")
+              )}"""
+            ).mkString(","),
+          s"-social-links:github::https://github.com/errors4s/${projectName}",
+          "-verbose"
         )
       case Some((2, n)) =>
         List("-language:experimental.macros") ++
@@ -98,40 +115,38 @@ lazy val docSettings: List[Def.Setting[_]] = List(
   }
 )
 
-lazy val commonSettings: List[Def.Setting[_]] =
-  List(
-    scalaVersion := scala30,
-    scalacOptions := {
-      val currentOptions: Seq[String] = scalacOptions.value
-      (
-        if (isScala3(scalaBinaryVersion.value)) {
-          // Remove -source since as of 0.1.19 of sbt-tpolecat it sets -source
-          // to be `-source:future`, but we only want that on sources which are
-          // _strictly_ Scala 3, we want `-source:3.0-migration` from cross
-          // compiled sources.
-          currentOptions.filterNot(_.startsWith("-source")) ++ List("-source:3.0-migration") ++
-            (if (JREMajorVersion.majorVersion > 8) {
-               List("-release:8")
-             } else {
-               Nil
-             })
-        } else {
-          currentOptions ++ List("-target:jvm-1.8", "-Wconf:cat=unused-imports:info")
-        }
-      )
-    },
-    libraryDependencies ++= {
+lazy val commonSettings: List[Def.Setting[_]] = List(
+  scalacOptions := {
+    val currentOptions: Seq[String] = scalacOptions.value
+    (
       if (isScala3(scalaBinaryVersion.value)) {
-        Nil
+        // Remove -source since as of 0.1.19 of sbt-tpolecat it sets -source
+        // to be `-source:future`, but we only want that on sources which are
+        // _strictly_ Scala 3, we want `-source:3.0-migration` from cross
+        // compiled sources.
+        currentOptions.filterNot(_.startsWith("-source")) ++ List("-source:3.0-migration") ++
+          (if (JREMajorVersion.majorVersion > 8) {
+             List("-release:8")
+           } else {
+             Nil
+           })
       } else {
-        List(
-          compilerPlugin(G.betterMonadicForG %% A.betterMonadicForA % V.betterMonadicForV),
-          compilerPlugin(G.typelevelG         % A.kindProjectorA    % V.kindProjectorV cross CrossVersion.full)
-        )
+        currentOptions ++ List("-target:jvm-1.8", "-Wconf:cat=unused-imports:info")
       }
-    },
-    crossScalaVersions := scalaVersions.toSeq
-  ) ++ docSettings
+    )
+  },
+  libraryDependencies ++= {
+    if (isScala3(scalaBinaryVersion.value)) {
+      Nil
+    } else {
+      List(
+        compilerPlugin(G.betterMonadicForG %% A.betterMonadicForA % V.betterMonadicForV),
+        compilerPlugin(G.typelevelG         % A.kindProjectorA    % V.kindProjectorV cross CrossVersion.full)
+      )
+    }
+  },
+  crossScalaVersions := scalaVersions.toSeq
+)
 
 // Publish Settings //
 
@@ -167,13 +182,13 @@ lazy val root = (project in file("."))
       Compile / packageSrc / publishArtifact := false
     )
   )
-  .aggregate(core)
+  .aggregate(core, scalacheck, cats)
   .disablePlugins(SbtVersionSchemeEnforcerPlugin)
 
 // Core //
 
 lazy val core = project
-  .settings(commonSettings, publishSettings)
+  .settings(commonSettings, publishSettings, docSettings(projectName))
   .settings(
     name := s"${projectName}",
     console / initialCommands :=
@@ -188,6 +203,47 @@ lazy val core = project
     libraryDependencies ++= List(G.scalametaG %% A.munitA % V.munitV % Test)
   )
 
+lazy val scalacheck = project
+  .settings(commonSettings, publishSettings, docSettings(s"${projectName}-scalacheck"))
+  .settings(
+    name := s"${projectName}-scalacheck",
+    console / initialCommands :=
+      List(
+        "org.errors4s.core._",
+        "org.errors4s.core.syntax.all._",
+        "org.errors4s.core.scalacheck.instances._",
+        "org.scalacheck._"
+      ).map(value => s"import $value").mkString("\n"),
+    libraryDependencies ++= List(G.scalacheckG %% A.scalacheckA % V.scalacheckV)
+  )
+  .dependsOn(core)
+
+lazy val cats = project
+  .settings(commonSettings, publishSettings, docSettings(s"${projectName}-cats"))
+  .settings(
+    name := s"${projectName}-cats",
+    console / initialCommands :=
+      initialImports(
+        List("org.errors4s.core", "org.errors4s.core.syntax.all", "org.errors4s.core.cats.instances"),
+        isScala3(scalaBinaryVersion.value)
+      ),
+    libraryDependencies ++= {
+      if (isScala3(scalaBinaryVersion.value)) {
+        Nil
+      } else {
+        List(G.scalaLangG % A.scalaReflectA % scalaVersion.value % Test)
+      }
+    },
+    libraryDependencies ++= List(G.typelevelG %% A.catsCoreA % V.catsV, G.typelevelG %% A.catsKernelA % V.catsV),
+    libraryDependencies ++=
+      List(
+        G.scalametaG %% A.munitA           % V.munitV,
+        G.typelevelG %% A.catsLawsA        % V.catsV,
+        G.typelevelG %% A.disciplineMunitA % V.disciplineMunitV
+      ).map(_ % Test)
+  )
+  .dependsOn(core, scalacheck % "test->compile")
+
 // Docs //
 
 lazy val docs = (project.in(file("errors4s-core-docs")))
@@ -196,23 +252,23 @@ lazy val docs = (project.in(file("errors4s-core-docs")))
     name := s"${projectName}-docs",
     mdocVariables := {
       val latestRelease: String =
-        if (isSnapshot.value) {
-          versionSchemeEnforcerPreviousVersion.value.getOrElse("latest")
-        } else {
-          version.value
-        }
+        // Need to wait for sbt-version-scheme-enforcer 2.1.2.0 for this to
+        // work dynamically.
+        "1.0.0.0-RC0"
       val scalaBinVer: String = scalaBinaryVersion.value
 
       Map(
-        "LATEST_RELEASE"       -> latestRelease,
-        "SCALA_BINARY_VERSION" -> scalaBinVer,
-        "SCALADOC_LINK"        -> scaladocLink(scalaBinVer, latestRelease),
-        "ORG"                  -> org,
-        "PROJECT_NAME"         -> projectName
+        "LATEST_RELEASE"           -> latestRelease,
+        "SCALA_BINARY_VERSION"     -> scalaBinVer,
+        "CORE_SCALADOC_LINK"       -> scaladocLink(scalaBinVer, projectName, latestRelease),
+        "SCALACHECK_SCALADOC_LINK" -> scaladocLink(scalaBinVer, s"${projectName}-scalacheck", latestRelease),
+        "CATS_SCALADOC_LINK"       -> scaladocLink(scalaBinVer, s"${projectName}-cats", latestRelease),
+        "ORG"                      -> org,
+        "PROJECT_NAME"             -> projectName
       )
     },
     mdocIn := file("docs-src"),
     mdocOut := file("docs")
   )
-  .dependsOn(core)
+  .dependsOn(core, scalacheck, cats)
   .enablePlugins(MdocPlugin)
