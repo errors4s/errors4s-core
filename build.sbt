@@ -48,18 +48,18 @@ ThisBuild / organization := org
 ThisBuild / scalaVersion := scala213
 ThisBuild / scalafixDependencies ++= List(G.organizeImportsG %% A.organizeImportsA % V.organizeImportsV)
 ThisBuild / scalafixScalaBinaryVersion := scalaBinaryVersion.value
-ThisBuild / semanticdbEnabled := true
-ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
+ThisBuild / semanticdbEnabled          := true
+ThisBuild / semanticdbVersion          := scalafixSemanticdb.revision
 
 // Baseline version for repo split
 
 ThisBuild / versionSchemeEnforcerInitialVersion := Some("1.0.0.0")
-ThisBuild / versionScheme := Some("pvp")
+ThisBuild / versionScheme                       := Some("pvp")
 
 // GithubWorkflow
 ThisBuild / githubWorkflowPublishTargetBranches := Nil
-ThisBuild / githubWorkflowOSes := Set("macos-latest", "ubuntu-latest").toList
-ThisBuild / githubWorkflowJavaVersions := Set("adopt@1.16", "adopt@1.11", "adopt@1.8").toList
+ThisBuild / githubWorkflowOSes                  := Set("macos-latest", "ubuntu-latest").toList
+ThisBuild / githubWorkflowJavaVersions          := Set("adopt@1.16", "adopt@1.11", "adopt@1.8").toList
 ThisBuild / githubWorkflowBuild := List(WorkflowStep.Sbt(List("versionSchemeEnforcerCheck", "Test / doc")))
 
 // Doc Settings
@@ -74,7 +74,7 @@ def javadocIoLink(groupId: String, artifactId: String, depVersion: String, scala
     )
 
 def docSettings(module: String): List[Def.Setting[_]] = List(
-  apiURL := Some(url(scaladocLink(scalaBinaryVersion.value, module, version.value))),
+  apiURL          := Some(url(scaladocLink(scalaBinaryVersion.value, module, version.value))),
   autoAPIMappings := true,
   Compile / doc / apiMappings := {
     if (isScala3(scalaBinaryVersion.value)) {
@@ -151,9 +151,9 @@ lazy val commonSettings: List[Def.Setting[_]] = List(
 // Publish Settings //
 
 lazy val publishSettings = List(
-  homepage := Some(projectUrl),
-  licenses := Seq("BSD3" -> url("https://opensource.org/licenses/BSD-3-Clause")),
-  publishMavenStyle := true,
+  homepage               := Some(projectUrl),
+  licenses               := Seq("BSD3" -> url("https://opensource.org/licenses/BSD-3-Clause")),
+  publishMavenStyle      := true,
   Test / publishArtifact := false,
   pomIncludeRepository := { _ =>
     false
@@ -177,7 +177,7 @@ lazy val root = (project in file("."))
   .settings(commonSettings, publishSettings)
   .settings(
     List(
-      name := s"${projectName}-root",
+      name                                   := s"${projectName}-root",
       Compile / packageBin / publishArtifact := false,
       Compile / packageSrc / publishArtifact := false
     )
@@ -267,7 +267,7 @@ lazy val docs = (project.in(file("errors4s-core-docs")))
         "PROJECT_NAME"             -> projectName
       )
     },
-    mdocIn := file("docs-src"),
+    mdocIn  := file("docs-src"),
     mdocOut := file("docs")
   )
   .dependsOn(core, scalacheck, cats)
