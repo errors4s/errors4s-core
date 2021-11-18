@@ -29,10 +29,10 @@ object GAVs {
     lazy val betterMonadicForV: String = "0.3.1"
     lazy val catsV: String             = "2.6.1"
     lazy val disciplineMunitV: String  = "1.0.9"
-    lazy val kindProjectorV: String    = "0.13.0"
-    lazy val munitV: String            = "0.7.26"
+    lazy val kindProjectorV: String    = "0.13.2"
+    lazy val munitV: String            = "0.7.29"
     lazy val organizeImportsV: String  = "0.4.4"
     lazy val scalacheckV: String       = "1.15.4"
-    lazy val semanticdbV: String       = "4.4.20"
+    lazy val semanticdbV: String       = "4.4.30"
   }
 }
