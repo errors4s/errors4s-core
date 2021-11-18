@@ -10,8 +10,8 @@ lazy val projectName   = "errors4s-core"
 lazy val projectUrl    = url(s"https://github.com/errors4s/${projectName}")
 lazy val scala212      = "2.12.14"
 lazy val scala213      = "2.13.7"
-lazy val scala30       = "3.1.0"
-lazy val scalaVersions = Set(scala212, scala213, scala30)
+lazy val scala3        = "3.1.0"
+lazy val scalaVersions = Set(scala212, scala213, scala3)
 
 // SBT Command Aliases //
 
