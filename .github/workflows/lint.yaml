@@ -20,7 +20,7 @@ jobs:
       matrix:
         os: [macos-latest, ubuntu-latest]
         scala: [2.13.6]
-        java: [adopt@1.16]
+        java: [openjdk@1.17.0]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout current branch (full)
@@ -29,7 +29,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Java and Scala
-        uses: olafurpg/setup-scala@v10
+        uses: olafurpg/setup-scala@v12
         with:
           java-version: ${{ matrix.java }}
 

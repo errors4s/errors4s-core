@@ -22,8 +22,8 @@ jobs:
     strategy:
       matrix:
         os: [macos-latest, ubuntu-latest]
-        scala: [2.12.14, 2.13.6, 3.0.1]
-        java: [adopt@1.16, adopt@1.11, adopt@1.8]
+        scala: [2.12.14, 2.13.7, 3.1.0]
+        java: [openjdk@1.17.0, openjdk@1.16.0, adopt@1.8]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout current branch (full)
@@ -32,7 +32,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Java and Scala
-        uses: olafurpg/setup-scala@v12
+        uses: olafurpg/setup-scala@v13
         with:
           java-version: ${{ matrix.java }}
 
@@ -49,6 +49,6 @@ jobs:
           key: ${{ runner.os }}-sbt-cache-v2-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('project/build.properties') }}
 
       - name: Check that workflows are up to date
-        run: sbt --client '++${{ matrix.scala }}; githubWorkflowCheck'
+        run: sbt ++${{ matrix.scala }} githubWorkflowCheck
 
-      - run: sbt --client '++${{ matrix.scala }}; versionSchemeEnforcerCheck; Test / doc'
+      - run: sbt ++${{ matrix.scala }} versionSchemeEnforcerCheck 'Test / doc'
