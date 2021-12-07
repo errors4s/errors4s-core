@@ -8,9 +8,9 @@ lazy val org           = "org.errors4s"
 lazy val jreVersion    = "17"
 lazy val projectName   = "errors4s-core"
 lazy val projectUrl    = url(s"https://github.com/errors4s/${projectName}")
-lazy val scala212      = "2.12.14"
+lazy val scala212      = "2.12.15"
 lazy val scala213      = "2.13.7"
-lazy val scala3        = "3.1.0"
+lazy val scala3        = "3.0.2"
 lazy val scalaVersions = Set(scala212, scala213, scala3)
 
 // SBT Command Aliases //
@@ -59,7 +59,8 @@ ThisBuild / versionScheme                       := Some("pvp")
 // GithubWorkflow
 ThisBuild / githubWorkflowPublishTargetBranches := Nil
 ThisBuild / githubWorkflowOSes                  := Set("macos-latest", "ubuntu-latest").toList
-ThisBuild / githubWorkflowJavaVersions          := Set("openjdk@1.17.0", "openjdk@1.16.0", "adopt@1.8").toList
+ThisBuild / githubWorkflowJavaVersions :=
+  Set("17", "11", "8").map(version => JavaSpec(JavaSpec.Distribution.Temurin, version)).toList
 ThisBuild / githubWorkflowBuild := List(WorkflowStep.Sbt(List("versionSchemeEnforcerCheck", "Test / doc")))
 
 // Doc Settings
