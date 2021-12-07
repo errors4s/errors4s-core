@@ -108,7 +108,7 @@ object NonEmptyString {
     expr
       .value
       .fold(
-        report.errorAndAbort(
+        report.throwError(
           "String value is not a literal constant. If at least part of the String is a literal constant, you can use the `nes` String interpolator. You can access it by import org.errors4s.core.syntax.all.*"
         )
       ) {

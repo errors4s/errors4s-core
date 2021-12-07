@@ -165,9 +165,7 @@ If you need support for a version combination which is not listed here, please o
 
 |Version|Cats Version|Scalacheck Version|Scala 2.11|Scala 2.12|Scala 2.13|Scala 3.0|Scala 3.1|
 |-------|:----------:|:----------------:|:--------:|:--------:|:--------:|:-------:|:-------:|
-|1.0.x.x|2.x.x       |1.x.x (>= 1.15.x) |No        |Yes       |Yes       |No       |Yes      |
-
-Note, as of 2021-11-18 this project targets Scala 3.1.0 for the Scala 3.x version, which is not backwards compatible with Scala 3.0.
+|1.0.x.x|2.x.x       |1.x.x (>= 1.15.x) |No        |Yes       |Yes       |Yes      |Yes      |
 
 # Versioning #
 
