@@ -255,7 +255,7 @@ lazy val docs = (project.in(file("errors4s-core-docs")))
       val latestRelease: String =
         // Need to wait for sbt-version-scheme-enforcer 2.1.2.0 for this to
         // work dynamically.
-        "1.0.0.0-RC0"
+        "1.0.0.0-RC3"
       val scalaBinVer: String = scalaBinaryVersion.value
 
       Map(

@@ -6,9 +6,9 @@
 * [cats][cats-javadoc]
 * [scalacheck][scalacheck-javadoc]
 
-[core-javadoc]: https://www.javadoc.io/doc/org.errors4s/errors4s-core_2.13/1.0.0.0-RC0/index.html "Core Scaladoc"
-[cats-javadoc]: https://www.javadoc.io/doc/org.errors4s/errors4s-core-cats_2.13/1.0.0.0-RC0/index.html "Cats Scaladoc"
-[scalacheck-javadoc]: https://www.javadoc.io/doc/org.errors4s/errors4s-core-scalacheck_2.13/1.0.0.0-RC0/index.html "Scalacheck Scaladoc"
+[core-javadoc]: https://www.javadoc.io/doc/org.errors4s/errors4s-core_2.13/1.0.0.0-RC3/index.html "Core Scaladoc"
+[cats-javadoc]: https://www.javadoc.io/doc/org.errors4s/errors4s-core-cats_2.13/1.0.0.0-RC3/index.html "Cats Scaladoc"
+[scalacheck-javadoc]: https://www.javadoc.io/doc/org.errors4s/errors4s-core-scalacheck_2.13/1.0.0.0-RC3/index.html "Scalacheck Scaladoc"
 
 # Overview #
 
@@ -28,7 +28,7 @@ This project provides three built in modules.
 Add this to your `libraryDependencies` in your `build.sbt`.
 
 ```scala
-    "org.errors4s" %% "errors4s-core" % "1.0.0.0-RC0"
+    "org.errors4s" %% "errors4s-core" % "1.0.0.0-RC3"
 ```
 
 ## How is this different from Throwable? ##
@@ -134,7 +134,7 @@ Error.withMessagesAndCause(nes"An error has occurred", "It was very bad", Error.
 Scalacheck instances for the types in `core` are provided in the `scalacheck` module. If you'd like to use them in your project you can add this to your `libraryDependencies`.
 
 ```scala
-    "org.errors4s" %% "errors4s-core-scalacheck" % "1.0.0.0-RC0"
+    "org.errors4s" %% "errors4s-core-scalacheck" % "1.0.0.0-RC3"
 ```
 
 The instances provided here are [orphan][orphan] instances. To use them you need to import the `org.errors4s.core.scalacheck.instances._` package. You will also need to have an underlying implicit [Arbitrary][scalacheck-arbitrary] or [Cogen][scalacheck-cogen] in scope.
@@ -154,7 +154,7 @@ val arbitraryNES: Arbitrary[NonEmptyString] = implicitly[Arbitrary[NonEmptyStrin
 Instances of various [Cats][cats] typeclasses for the types in `core` are provided in the `cats` module. If you'd like to use them in your project you can add this to your `libraryDependencies`.
 
 ```scala
-    "org.errors4s" %% "errors4s-core-cats" % "1.0.0.0-RC0"
+    "org.errors4s" %% "errors4s-core-cats" % "1.0.0.0-RC3"
 ```
 
 The instances provided here are [orphan][orphan] instances. To use them you need to import the `org.errors4s.core.cats.instances._` package.
