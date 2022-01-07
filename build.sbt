@@ -198,7 +198,7 @@ lazy val core = project
       if (isScala3(scalaBinaryVersion.value)) {
         Nil
       } else {
-        List(G.scalaLangG % A.scalaReflectA % scalaVersion.value % Provided)
+        List(G.scalaLangG % A.scalaReflectA % scalaVersion.value)
       }
     },
     libraryDependencies ++= List(G.scalametaG %% A.munitA % V.munitV % Test)
