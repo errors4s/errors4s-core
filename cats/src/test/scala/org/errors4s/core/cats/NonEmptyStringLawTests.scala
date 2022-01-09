@@ -9,4 +9,5 @@ import org.errors4s.core.scalacheck.instances._
 final class NonEmptyStringLawTests extends DisciplineSuite {
   checkAll("NonEmptyString.HashLaws", HashTests[NonEmptyString].hash)
   checkAll("NonEmptyString.OrderLaws", OrderTests[NonEmptyString].order)
+  checkAll("NonEmptyString.SemigroupLaws", SemigroupTests[NonEmptyString].semigroup)
 }
